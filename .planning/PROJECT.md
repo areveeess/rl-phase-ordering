@@ -62,6 +62,7 @@ Produce real, reproducible, honestly reported numbers comparing a learned pass-o
 - **Compute**: single laptop (RTX 3060 Laptop GPU, CPU-first training) — limits action-space size, benchmark count and training budget
 - **Scope**: bounded to one semester, curated pass subset, subset of standard benchmark suites (e.g. those bundled with CompilerGym) — keeps the search space tractable
 - **Dependencies**: CompilerGym (LLVM environment) and IR2Vec — committed to in the Review 1 document; changing either requires an explicit decision
+- **Change control**: research may propose revamping or improvising on the Review 1 topic/approach (e.g. a different environment, algorithm, or action space) if that is clearly better or if the original proves infeasible — but any such change must first be explained to the user (what it is and why) and approved before it is adopted
 - **Integrity**: report measured results honestly, including cases where the agent does not beat `-O2`/`-O3` — this is the stated aim of the project; no tuning of the evaluation to force a win
 
 ## Key Decisions
@@ -76,6 +77,7 @@ Produce real, reproducible, honestly reported numbers comparing a learned pass-o
 | Run experiments in WSL2 on the local laptop | User's available machine; no dependency on external servers | — Pending |
 | For 14 Oct: try for a real early training run, fall back to measured baselines plus design labeled preliminary | Only 3 days and environment setup risk; results must be real, not fabricated | — Pending |
 | Project supplies code, results and screenshots; the team writes the submission documents | User's choice | — Pending |
+| Research may revamp the topic/approach, but only after educating the user and getting approval | User wants a better outcome if one exists, without silent scope changes | — Pending |
 
 ## Evolution
 
