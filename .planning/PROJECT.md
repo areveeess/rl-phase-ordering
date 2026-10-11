@@ -18,7 +18,10 @@ Produce real, reproducible, honestly reported numbers comparing a learned pass-o
 
 - [ ] Working CompilerGym LLVM environment on WSL2 (Windows 11), reproducible from written setup steps
 - [ ] Measured `-O0`/`-O2`/`-O3` baselines (instruction count / code size) on the chosen benchmark subsets
-- [ ] Benchmark subset split into disjoint training and held-out test sets
+- [ ] `-Oz` reported as an additional reference column beside `-O2`/`-O3`
+- [ ] Sanity baselines: random pass sequences and the best single fixed sequence found on the training set
+- [ ] Benchmark subset split (by program family) into disjoint training, validation and held-out test sets
+- [ ] Everything explainable in one sentence for the presentation and viva; a one-page design note with likely viva questions
 - [ ] Phase ordering formulated as an MDP: IR2Vec embedding as state, selection of a pass (or pass group) as action, change in code size/instruction count as reward
 - [ ] Action space limited to a curated subset of LLVM passes (optionally dependency-aware pass groups, as in POSET-RL)
 - [ ] Policy-gradient training pipeline that learns a pass-selection policy on the training set
@@ -78,6 +81,12 @@ Produce real, reproducible, honestly reported numbers comparing a learned pass-o
 | For 14 Oct: try for a real early training run, fall back to measured baselines plus design labeled preliminary | Only 3 days and environment setup risk; results must be real, not fabricated | — Pending |
 | Project supplies code, results and screenshots; the team writes the submission documents | User's choice | — Pending |
 | Research may revamp the topic/approach, but only after educating the user and getting approval | User wants a better outcome if one exists, without silent scope changes | — Pending |
+| Add `-Oz` as an extra reference column beside `-O2`/`-O3` (approved 2026-10-11) | `-Oz` is the size-focused level and beats service `-O3` on all 23 cBench programs; avoids a too-low bar. Nothing removed. | — Pending |
+| Add random-sequence and best-single-fixed-sequence sanity baselines (approved 2026-10-11) | Random search is strong in the literature; the agent must beat it for the result to mean anything | — Pending |
+| Extra small training suites, test on cBench families: approved 2026-10-11, then moved to v2 the same day | User needs the project compact enough to present and answer viva questions; cBench-only family split is the v1 plan | — Pending |
+| Keep v1 compact (13 requirements), each explainable in one sentence | User must present and answer viva voce | — Pending |
+| REINFORCE with baseline is the primary algorithm; PPO is an optional backup (approved 2026-10-11) | Still policy gradient per Review 1; full control of dense vs sparse experiment | — Pending |
+| Not adopted: `-Oz` as headline, extra state features (ablation only), Autophase fallback, STOP action, replacing CompilerGym | Cost or risk outweighs benefit now; revisit only with the user's approval | — Pending |
 
 ## Evolution
 
