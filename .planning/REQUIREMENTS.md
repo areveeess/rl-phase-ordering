@@ -77,13 +77,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (filled by roadmapper) | | Pending |
+| ENV-01 | Phase 1 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| BASE-01 | Phase 2 | Pending |
+| MDP-01 | Phase 3 | Pending |
+| BASE-02 | Phase 3 | Pending |
+| TRAIN-01 | Phase 4 | Pending |
+| OUT-01 | Phase 4 | Pending |
+| TRAIN-02 | Phase 5 | Pending |
+| EVAL-01 | Phase 6 | Pending |
+| EVAL-02 | Phase 6 | Pending |
+| EVAL-03 | Phase 6 | Pending |
+| OUT-02 | Phase 7 | Pending |
+| OUT-03 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-10-11*
-*Last updated: 2026-10-11 after initial definition*
+*Last updated: 2026-10-11 after roadmap creation*
