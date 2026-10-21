@@ -156,7 +156,7 @@ def main():
     ax.set_xticks(x)
     ax.set_xticklabels(test.benchmark, rotation=20, fontsize=8)
     ax.set_ylabel("instructions / -O0 (lower is smaller)", color=MUTED, fontsize=9)
-    ax.set_title("Held-out test programs (RL = median of 3 seeds)", color=INK, fontsize=10, loc="left")
+    ax.set_title("Held-out test programs (RL = median over seeds)", color=INK, fontsize=10, loc="left")
     style(ax)
     ax.legend(frameon=False, fontsize=8, ncol=5, loc="upper center", bbox_to_anchor=(0.5, -0.22))
     fig.tight_layout()

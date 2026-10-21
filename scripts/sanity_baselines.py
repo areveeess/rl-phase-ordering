@@ -38,6 +38,19 @@ def main():
     cands = [[rng.randrange(len(ACTIONS)) for _ in range(EPISODE_LEN)] for _ in range(args.candidates)]
     split = json.load(open("splits/split.json"))
     env = make_env()
+    # Resumable: every (candidate, program) count is cached on disk as it is measured.
+    cache_path = os.path.splitext(args.out)[0] + "_cache.json"
+    cache = json.load(open(cache_path)) if os.path.exists(cache_path) else {}
+
+    def final_count_cached(env, p, seq):
+        key = f"{' '.join(map(str, seq))}|{p}"
+        if key not in cache:
+            cache[key] = final_count(env, p, seq)
+            with open(cache_path + ".tmp", "w") as fh:
+                json.dump(cache, fh)
+            os.replace(cache_path + ".tmp", cache_path)
+        return cache[key]
+
     try:
         o0 = {}
         for s in ("train", "val", "test"):
@@ -48,7 +61,7 @@ def main():
         scores = []
         train_counts = {}
         for i, seq in enumerate(cands):
-            counts = {p: final_count(env, p, seq) for p in split["train"]}
+            counts = {p: final_count_cached(env, p, seq) for p in split["train"]}
             train_counts[i] = counts
             scores.append(float(np.exp(np.mean([np.log(counts[p] / o0[p]) for p in split["train"]]))))
             print(f"candidate {i}: train geomean final/O0 = {scores[-1]:.4f}", flush=True)
@@ -58,9 +71,9 @@ def main():
         rows = []
         for s in ("train", "val", "test"):
             for p in split[s]:
-                rand = [train_counts[i][p] if p in split["train"] else final_count(env, p, cands[i])
+                rand = [train_counts[i][p] if p in split["train"] else final_count_cached(env, p, cands[i])
                         for i in range(args.random)]
-                fixed = train_counts[best][p] if p in split["train"] else final_count(env, p, best_seq)
+                fixed = train_counts[best][p] if p in split["train"] else final_count_cached(env, p, best_seq)
                 rows.append({"split": s, "benchmark": p, "O0": o0[p], "random_mean": float(np.mean(rand)),
                              "random_best": min(rand), "best_fixed": fixed})
                 print(rows[-1], flush=True)

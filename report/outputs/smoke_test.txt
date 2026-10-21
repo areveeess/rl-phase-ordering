@@ -1,0 +1,13 @@
+$ python smoke_test.py
+[PASS] no orphaned compiler_gym services: count=0
+[PASS] make llvm-v0
+[PASS] reset cbench-v1/qsort
+[PASS] Ir observation: 39050 chars
+[PASS] instruction counts: {'IrInstructionCount': 638, 'IrInstructionCountO0': 638, 'IrInstructionCountO3': 1163, 'IrInstructionCountOz': 315}
+[PASS] step -mem2reg: count=346 action_had_no_effect=False
+[PASS] step -instcombine: count=337 action_had_no_effect=False
+[PASS] IR2Vec fa vector: dim=300 L2=247.0
+[INFO] env.validate(): skipped (pass --try-validate); see SETUP.md
+[PASS] lli fallback output check (qsort): match
+[PASS] lli fallback output check (dijkstra): match
+[PASS] lli fallback output check (crc32): match

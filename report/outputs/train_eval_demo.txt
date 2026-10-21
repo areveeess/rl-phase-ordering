@@ -1,0 +1,14 @@
+$ python scripts/train.py --reward sparse --seed 0 --episodes 32 --batch 8 --checkpoints 2 --train-on crc32 qsort --out /tmp/t1
+done: selected /tmp/t1/ckpt_00004.pt, 14s
+$ python scripts/evaluate.py /tmp/t1 --programs crc32 dijkstra --out /tmp/t1/eval.csv
+{'run': 't1', 'reward': 'sparse', 'split': 'train', 'benchmark': 'crc32', 'O0': 242, 'final': 199,
+ 'sequence': '-gvn -gvn -gvn ... (15 steps)', 'noop_count': 0, 'no_effect': 14,
+ 'replay_final': 199, 'replay_ok': True, 'error': ''}
+{'run': 't1', 'reward': 'sparse', 'split': 'train', 'benchmark': 'dijkstra', 'O0': 450, 'final': 360,
+ 'sequence': '-gvn -gvn -gvn ... (15 steps)', 'noop_count': 0, 'no_effect': 14,
+ 'replay_final': 360, 'replay_ok': True, 'error': ''}
+wrote /tmp/t1/eval.csv
+$ python scripts/profile_step.py qsort adpcm gsm
+qsort: step 2ms  Ir fetch 2ms (25k chars)  ir2vec fa 28ms  sym 19ms
+adpcm: step 2ms  Ir fetch 2ms (20k chars)  ir2vec fa 26ms  sym 21ms
+gsm: step 11ms  Ir fetch 16ms (575k chars)  ir2vec fa 430ms  sym 225ms

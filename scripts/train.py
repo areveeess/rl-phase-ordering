@@ -41,6 +41,7 @@ def main():
     ap.add_argument("--checkpoints", type=int, default=5)
     ap.add_argument("--train-on", nargs="*", help="override training programs (overfit check)")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--max-seconds", type=float, default=0, help="exit (code 3) after this long; rerun resumes")
     args = ap.parse_args()
 
     torch.set_num_threads(1)  # several runs share the CPU
@@ -55,12 +56,40 @@ def main():
     env = PhaseOrderingEnv(reward_mode=args.reward)
     net = PolicyValueNet(STATE_DIM, len(ACTIONS))
     opt = torch.optim.Adam(net.parameters(), lr=args.lr)
-    log, ckpts = [], []
+    log, ckpts, sel, start = [], [], [], 1
     n_updates = args.episodes // args.batch
     ckpt_every = max(1, n_updates // args.checkpoints)
     t0 = time.time()
+    # Crash-tolerant resume: the full training state is saved after every update, so a
+    # WSL crash loses at most one update. Resuming changes the random stream, not the method.
+    state_path = os.path.join(args.out, "state.pt")
+    if os.path.exists(state_path):
+        st = torch.load(state_path, weights_only=False)
+        net.load_state_dict(st["net"])
+        opt.load_state_dict(st["opt"])
+        log, ckpts, sel, start = st["log"], st["ckpts"], st["sel"], st["u"] + 1
+        random.setstate(st["py_random"])
+        np.random.set_state(st["np_random"])
+        torch.set_rng_state(st["torch_rng"])
+        t0 -= st["seconds"]
+        print(f"resumed at update {start}", flush=True)
+
+    def save_state(u):
+        st = {"net": net.state_dict(), "opt": opt.state_dict(), "log": log, "ckpts": ckpts, "sel": sel, "u": u,
+              "py_random": random.getstate(), "np_random": np.random.get_state(),
+              "torch_rng": torch.get_rng_state(), "seconds": time.time() - t0}
+        torch.save(st, state_path + ".tmp")
+        os.replace(state_path + ".tmp", state_path)
+
+    def out_of_time():
+        return args.max_seconds and time.time() - t_start > args.max_seconds
+
+    t_start = time.time()
     try:
-        for u in range(1, n_updates + 1):
+        for u in range(start, n_updates + 1):
+            if out_of_time():
+                print("chunk time limit reached; rerun to resume", flush=True)
+                sys.exit(3)
             eps = [run_episode(env, net, random.choice(train)) for _ in range(args.batch)]
             stats = reinforce_update(net, opt, eps)
             acts = np.concatenate([e["actions"] for e in eps])
@@ -77,19 +106,27 @@ def main():
                 path = os.path.join(args.out, f"ckpt_{u:05d}.pt")
                 torch.save(net.state_dict(), path)
                 ckpts.append(path)
-        save_csv(pd.DataFrame(log), os.path.join(args.out, "train_log.csv"))
+            save_state(u)
+            save_csv(pd.DataFrame(log), os.path.join(args.out, "train_log.csv"))
 
         # Checkpoint selection on the validation split only (never on test).
-        best, best_score, sel = ckpts[-1], -1e9, []
         if val:
+            done = {s["checkpoint"] for s in sel}
             for path in ckpts:
+                if os.path.basename(path) in done:
+                    continue
+                if out_of_time():
+                    print("chunk time limit reached during selection; rerun to resume", flush=True)
+                    sys.exit(3)
                 net.load_state_dict(torch.load(path))
                 red = greedy_reduction(env, net, val)
-                score = float(np.mean(list(red.values())))
-                sel.append({"checkpoint": os.path.basename(path), "val_mean_reduction": score, **red})
-                if score > best_score:
-                    best, best_score = path, score
+                sel.append({"checkpoint": os.path.basename(path),
+                            "val_mean_reduction": float(np.mean(list(red.values()))), **red})
+                save_state(n_updates)
             save_csv(pd.DataFrame(sel), os.path.join(args.out, "val_selection.csv"))
+            best = os.path.join(args.out, max(sel, key=lambda s: s["val_mean_reduction"])["checkpoint"])
+        else:
+            best = ckpts[-1]
         net.load_state_dict(torch.load(best))
         torch.save(net.state_dict(), os.path.join(args.out, "policy.pt"))
         json.dump({**vars(args), "selected": os.path.basename(best), "train_programs": train,

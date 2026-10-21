@@ -17,28 +17,25 @@ step split;               python scripts/make_split.py
 # Training (TRAIN-02): dense vs sparse, identical network / hyperparameters / episode
 # budget, 3 seeds each, all six in parallel. The -O levels (BASE-01), the overfit
 # check (TRAIN-01) and the sanity baselines (BASE-02) run alongside.
-step "training ($EPISODES episodes per run), baselines, overfit check, sanity baselines"
-pids=()
-python scripts/baselines.py > "$L/baselines.log" 2>&1 &
-pids+=($!)
+# At most two CompilerGym jobs at a time: more than that exhausted host RAM and
+# crashed the WSL VM on this 16 GB laptop.
+step "training ($EPISODES episodes per run), two jobs at a time"
 for seed in 0 1 2; do
   for mode in dense sparse; do
-    python scripts/train.py --reward "$mode" --seed "$seed" --episodes "$EPISODES" \
-      --out "runs/${mode}_s$seed" > "$L/${mode}_s$seed.log" 2>&1 &
-    pids+=($!)
+    if [ ! -f "runs/${mode}_s$seed/policy.pt" ]; then
+      python scripts/train.py --reward "$mode" --seed "$seed" --episodes "$EPISODES" \
+        --out "runs/${mode}_s$seed" > "$L/${mode}_s$seed.log" 2>&1 &
+    fi
   done
+  wait
+  step "seed $seed done"; grep -h "done:" "$L"/*_s$seed.log
 done
-python scripts/train.py --reward dense --seed 0 --episodes 480 --checkpoints 1 \
+step "overfit check and -O baselines"
+[ -f runs/overfit/policy.pt ] || python scripts/train.py --reward dense --seed 0 --episodes 480 --checkpoints 1 \
   --train-on crc32 qsort adpcm --out runs/overfit > "$L/overfit.log" 2>&1 &
-pids+=($!)
-python scripts/sanity_baselines.py > "$L/sanity.log" 2>&1 &
-pids+=($!)
-while [ -n "$(jobs -rp)" ]; do
-  sleep 60
-  for f in "$L"/dense_s0.log "$L"/sparse_s0.log; do echo "  $(basename "$f"): $(grep '"update"' "$f" | tail -n 1 | cut -c1-140)"; done
-  echo "  sanity: $(tail -n 1 "$L/sanity.log" | cut -c1-100)"
-done
-wait "${pids[@]}"
+python scripts/baselines.py > "$L/baselines.log" 2>&1 &
+wait
+step "sanity baselines"; python scripts/sanity_baselines.py > "$L/sanity.log" 2>&1
 grep -h -E "done:|Traceback|Error" "$L"/*_s*.log "$L/overfit.log" "$L/sanity.log" | head -20
 
 step evaluation

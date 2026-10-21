@@ -42,7 +42,9 @@ def main():
         split, args.splits = {"train": args.programs}, ["train"]
     env = PhaseOrderingEnv()
     renv = make_env()
-    rows = []
+    # Resumable: rows already in the output file are kept and skipped.
+    rows = pd.read_csv(args.out).to_dict("records") if os.path.exists(args.out) else []
+    done = {(r["run"], r["benchmark"]) for r in rows}
     try:
         for run in args.runs:
             meta = json.load(open(os.path.join(run, "run.json")))
@@ -53,6 +55,8 @@ def main():
                 for p in split[s]:
                     row = {"run": os.path.basename(run.rstrip("/")), "reward": meta["reward"],
                            "seed": meta["seed"], "split": s, "benchmark": p}
+                    if (row["run"], p) in done:
+                        continue
                     try:
                         ep = run_episode(env, net, p, greedy=True)
                         seq = [ACTIONS[a] for a in ep["actions"]]
@@ -65,6 +69,8 @@ def main():
                         row.update(final=None, sequence="", replay_ok=False, error=f"{type(e).__name__}: {e}")
                     rows.append(row)
                     print(row, flush=True)
+                    os.makedirs(os.path.dirname(args.out), exist_ok=True)
+                    save_csv(pd.DataFrame(rows), args.out)
     finally:
         env.close()
         renv.close()
