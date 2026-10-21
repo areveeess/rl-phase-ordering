@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from rlpo.io import save_csv  # noqa: E402
 from rlpo.env import ACTIONS, EPISODE_LEN, NOOP, bench_uri, make_env  # noqa: E402
 
 
@@ -65,7 +66,7 @@ def main():
                 print(rows[-1], flush=True)
     finally:
         env.close()
-    pd.DataFrame(rows).to_csv(args.out, index=False)
+    save_csv(pd.DataFrame(rows), args.out)
     with open(os.path.splitext(args.out)[0] + "_best_fixed_sequence.txt", "w") as fh:
         fh.write(" ".join(ACTIONS[a] for a in best_seq) + "\n")
     print("best fixed sequence:", " ".join(ACTIONS[a] for a in best_seq))

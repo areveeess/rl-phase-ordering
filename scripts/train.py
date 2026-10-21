@@ -16,6 +16,7 @@ import pandas as pd
 import torch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from rlpo.io import save_csv  # noqa: E402
 from rlpo.agent import PolicyValueNet, reinforce_update, run_episode  # noqa: E402
 from rlpo.env import ACTIONS, NOOP, STATE_DIM, PhaseOrderingEnv  # noqa: E402
 
@@ -76,7 +77,7 @@ def main():
                 path = os.path.join(args.out, f"ckpt_{u:05d}.pt")
                 torch.save(net.state_dict(), path)
                 ckpts.append(path)
-        pd.DataFrame(log).to_csv(os.path.join(args.out, "train_log.csv"), index=False)
+        save_csv(pd.DataFrame(log), os.path.join(args.out, "train_log.csv"))
 
         # Checkpoint selection on the validation split only (never on test).
         best, best_score, sel = ckpts[-1], -1e9, []
@@ -88,7 +89,7 @@ def main():
                 sel.append({"checkpoint": os.path.basename(path), "val_mean_reduction": score, **red})
                 if score > best_score:
                     best, best_score = path, score
-            pd.DataFrame(sel).to_csv(os.path.join(args.out, "val_selection.csv"), index=False)
+            save_csv(pd.DataFrame(sel), os.path.join(args.out, "val_selection.csv"))
         net.load_state_dict(torch.load(best))
         torch.save(net.state_dict(), os.path.join(args.out, "policy.pt"))
         json.dump({**vars(args), "selected": os.path.basename(best), "train_programs": train,

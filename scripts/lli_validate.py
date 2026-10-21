@@ -5,6 +5,7 @@ import sys
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from rlpo.io import save_csv  # noqa: E402
 from rlpo.env import ACTIONS, make_env  # noqa: E402
 from rlpo.lli_check import lli_equivalent  # noqa: E402
 
@@ -24,4 +25,4 @@ try:
         print(rows[-1], flush=True)
 finally:
     env.close()
-pd.DataFrame(rows).to_csv("results/lli_validation.csv", index=False)
+save_csv(pd.DataFrame(rows), "results/lli_validation.csv")

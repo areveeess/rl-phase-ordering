@@ -15,6 +15,7 @@ import pandas as pd
 import torch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from rlpo.io import save_csv  # noqa: E402
 from rlpo.agent import PolicyValueNet, run_episode  # noqa: E402
 from rlpo.env import ACTIONS, NOOP, STATE_DIM, PhaseOrderingEnv, bench_uri, make_env  # noqa: E402
 
@@ -68,7 +69,7 @@ def main():
         env.close()
         renv.close()
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
-    pd.DataFrame(rows).to_csv(args.out, index=False)
+    save_csv(pd.DataFrame(rows), args.out)
     print(f"wrote {args.out}")
 
 

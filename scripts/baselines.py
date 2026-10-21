@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from compiler_gym.envs.llvm import make_benchmark  # noqa: E402
 from compiler_gym.third_party import llvm  # noqa: E402
 
+from rlpo.io import save_csv  # noqa: E402
 from rlpo.env import make_env  # noqa: E402
 
 LEVELS = ["-O2", "-O3", "-Oz"]
@@ -45,7 +46,7 @@ def main():
         with tempfile.TemporaryDirectory(dir="/dev/shm") as tmp:
             for uri in uris:
                 name = uri.split("/")[-1]
-                if name in done or name == "ghostscript":  # crashes the WSL VM; see splits/split.json
+                if name in done or name in ("ghostscript", "jpeg-c", "jpeg-d"):  # crash WSL; see splits/split.json
                     continue
                 env.reset(benchmark=uri)
                 row = {
@@ -63,7 +64,7 @@ def main():
                 rows.append(row)
                 print(row, flush=True)
                 os.makedirs(os.path.dirname(args.out), exist_ok=True)
-                pd.DataFrame(rows)[cols].sort_values("benchmark").to_csv(args.out, index=False)
+                save_csv(pd.DataFrame(rows)[cols].sort_values("benchmark"), args.out)
     finally:
         env.close()
     print(f"wrote {args.out}")

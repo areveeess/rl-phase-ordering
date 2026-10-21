@@ -1,36 +1,50 @@
 #!/usr/bin/env bash
 # Reproduce every result in results/ (run inside WSL with the venv active).
-# Keep the launching wsl.exe attached: WSL stops the distro when no client is attached,
-# and starting other wsl.exe sessions while this runs has crashed the WSL service here.
+# Notes for this machine (see SETUP.md): keep the launching wsl.exe attached (WSL stops
+# the distro when no client is attached), and do not read files under /mnt/c from
+# Windows while jobs write them - that has crashed the WSL service. Logs therefore go
+# to the WSL disk and are copied into logs/ at the end; progress goes to stdout.
 set -uo pipefail
 cd "$(dirname "$0")"
 export PYTHONWARNINGS=ignore
-EPISODES="${EPISODES:-800}"
-mkdir -p logs runs results
+EPISODES="${EPISODES:-480}"
+L="$HOME/rlphase-logs"
+mkdir -p "$L" runs results
 step() { echo "[run_all $(date +%T)] $*"; }
 
-step smoke test;          python smoke_test.py > logs/smoke.log 2>&1
+step smoke test;          python smoke_test.py > "$L/smoke.log" 2>&1; grep -E '^\[' "$L/smoke.log"
 step split;               python scripts/make_split.py
-step baselines;           python scripts/baselines.py > logs/baselines.log 2>&1
-
 # Training (TRAIN-02): dense vs sparse, identical network / hyperparameters / episode
-# budget, 3 seeds each, all six in parallel. The overfit check (TRAIN-01) and the
-# sanity baselines (BASE-02) run alongside.
-step training, overfit check and sanity baselines
+# budget, 3 seeds each, all six in parallel. The -O levels (BASE-01), the overfit
+# check (TRAIN-01) and the sanity baselines (BASE-02) run alongside.
+step "training ($EPISODES episodes per run), baselines, overfit check, sanity baselines"
+pids=()
+python scripts/baselines.py > "$L/baselines.log" 2>&1 &
+pids+=($!)
 for seed in 0 1 2; do
   for mode in dense sparse; do
     python scripts/train.py --reward "$mode" --seed "$seed" --episodes "$EPISODES" \
-      --out "runs/${mode}_s$seed" > "logs/${mode}_s$seed.log" 2>&1 &
+      --out "runs/${mode}_s$seed" > "$L/${mode}_s$seed.log" 2>&1 &
+    pids+=($!)
   done
 done
 python scripts/train.py --reward dense --seed 0 --episodes 480 --checkpoints 1 \
-  --train-on crc32 qsort adpcm --out runs/overfit > logs/overfit.log 2>&1 &
-python scripts/sanity_baselines.py > logs/sanity.log 2>&1 &
-wait
+  --train-on crc32 qsort adpcm --out runs/overfit > "$L/overfit.log" 2>&1 &
+pids+=($!)
+python scripts/sanity_baselines.py > "$L/sanity.log" 2>&1 &
+pids+=($!)
+while [ -n "$(jobs -rp)" ]; do
+  sleep 60
+  for f in "$L"/dense_s0.log "$L"/sparse_s0.log; do echo "  $(basename "$f"): $(grep '"update"' "$f" | tail -n 1 | cut -c1-140)"; done
+  echo "  sanity: $(tail -n 1 "$L/sanity.log" | cut -c1-100)"
+done
+wait "${pids[@]}"
+grep -h -E "done:|Traceback|Error" "$L"/*_s*.log "$L/overfit.log" "$L/sanity.log" | head -20
 
 step evaluation
-python scripts/evaluate.py runs/overfit --programs crc32 qsort adpcm --out results/overfit_eval.csv > logs/overfit_eval.log 2>&1
-python scripts/evaluate.py runs/dense_s* runs/sparse_s* --out results/eval.csv > logs/eval.log 2>&1
-step lli validation;      python scripts/lli_validate.py > logs/lli.log 2>&1
-step analysis;            python scripts/analyze.py > logs/analyze.log 2>&1
+python scripts/evaluate.py runs/overfit --programs crc32 qsort adpcm --out results/overfit_eval.csv > "$L/overfit_eval.log" 2>&1
+python scripts/evaluate.py runs/dense_s* runs/sparse_s* --out results/eval.csv > "$L/eval.log" 2>&1; tail -n 1 "$L/eval.log"
+step lli validation;      python scripts/lli_validate.py > "$L/lli.log" 2>&1
+step analysis;            python scripts/analyze.py > "$L/analyze.log" 2>&1; cat "$L/analyze.log"
+mkdir -p logs && cp "$L"/*.log logs/
 step done
