@@ -2,3 +2,6 @@ logs/
 runs/*/ckpt_*.pt
 __pycache__/
 *.pyc
+.planning/
+.claude/
+runs/

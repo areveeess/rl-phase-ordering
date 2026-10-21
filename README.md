@@ -1,53 +1,64 @@
 # RL-Guided Compiler Phase Ordering
 
-A reinforcement-learning agent (REINFORCE with a value baseline) learns a program-specific sequence of LLVM passes to
-shrink code. It is compared against LLVM's fixed `-O2`, `-O3` and `-Oz` pipelines on cBench programs it never trained on.
-Built on CompilerGym (`llvm-v0`, LLVM 10) with IR2Vec program embeddings as the state.
+Compiler Design project, VIT (Department of CSE).
+Aryan V Sangai (24BCI0202), Nikhila Abdul Salam (24BCE2690), Raj Vardhan Singh (24BDS0200).
 
-VIT Compiler Design project: Aryan V Sangai, Nikhila Abdul Salam, Raj Vardhan Singh.
+LLVM applies the same fixed pass order (`-O2`, `-O3`, `-Oz`) to every program, although the best order differs from
+program to program. We train a reinforcement-learning agent to pick a program-specific sequence of LLVM passes that
+makes the code smaller. We then compare it with LLVM's own pipelines, including on programs the agent never saw in training.
 
-**Results:** see [`results/RESULTS.md`](results/RESULTS.md) (generated) and the summary below.
-**Design and viva notes:** [`DESIGN.md`](DESIGN.md). **Setup and known issues:** [`SETUP.md`](SETUP.md).
+- **Environment:** CompilerGym `llvm-v0` (LLVM 10), cBench programs
+- **State:** IR2Vec embedding of the current LLVM IR
+- **Actions:** 24 size-related passes from LLVM's `-Oz` pipeline, plus NOOP
+- **Reward:** drop in IR instruction count (dense per step, or sparse at the end)
+- **Learner:** REINFORCE with a value baseline (PyTorch)
 
-## Reproduce
+More detail on each choice is in [DESIGN.md](DESIGN.md). Setup notes and known problems are in [SETUP.md](SETUP.md).
 
-Inside WSL2 (Ubuntu 24.04+):
+## Running it
+
+CompilerGym only runs on Linux, so on Windows everything runs inside WSL2.
 
 ```bash
-cd "/mnt/c/.../compiler project"
-bash setup.sh                       # pinned Python 3.10 env, ~10 min
+bash setup.sh                         # creates ~/venvs/rlphase with the pinned versions
 source ~/venvs/rlphase/bin/activate
-python smoke_test.py                # every line must be PASS/INFO
-bash run_all.sh                     # baselines, training (6 runs), evaluation, plots; ~1 h on 16 CPU threads
+python smoke_test.py                  # checks CompilerGym, IR2Vec and output validation
+bash run_all.sh                       # baselines, training, evaluation, plots -> results/
 ```
 
-`run_all.sh` writes everything under `results/` and `runs/`. Logs are written to `~/rlphase-logs` and copied to `logs/` at the end.
+On our laptop the WSL VM kept crashing under long runs, so `drive.sh` (run from Git Bash on Windows) does the same
+steps in short chunks and resumes after a crash.
 
-## Layout
+## Code
 
-| Path | What |
+| Path | What it does |
 |---|---|
-| `rlpo/env.py` | The MDP: actions, IR2Vec state, dense/sparse reward, embedding cache |
-| `rlpo/agent.py` | Policy/value network, episode rollout, REINFORCE update |
-| `rlpo/lli_check.py` | `lli` output-equivalence check (validation fallback) |
-| `scripts/make_split.py` | Family-grouped train/val/test split -> `splits/split.json` |
-| `scripts/baselines.py` | `-O0/-O2/-O3/-Oz` instruction counts -> `results/baselines.csv` |
-| `scripts/sanity_baselines.py` | Random and best-fixed-sequence baselines |
-| `scripts/train.py` | Training with validation-based checkpoint selection |
-| `scripts/evaluate.py` | Greedy evaluation and replay check -> `results/eval.csv` |
-| `scripts/lli_validate.py` | `lli` check of every final sequence |
-| `scripts/analyze.py` | Tables, plots, `results/RESULTS.md` |
+| `rlpo/env.py` | The MDP: pass list, IR2Vec state, dense/sparse reward |
+| `rlpo/agent.py` | Policy/value network and the REINFORCE update |
+| `rlpo/lli_check.py` | Checks that an optimised program still prints the same output (using `lli`) |
+| `scripts/make_split.py` | Train / validation / test split, keeping similar programs together |
+| `scripts/baselines.py` | Instruction counts after `-O0`, `-O2`, `-O3`, `-Oz` |
+| `scripts/sanity_baselines.py` | Random sequences and the best fixed sequence |
+| `scripts/train.py` | Training (resumable) with checkpoint choice on the validation set |
+| `scripts/evaluate.py` | Runs the trained policy and replays each sequence to check it |
+| `scripts/analyze.py` | Tables and plots |
+| `report/` | Assessment 10 document and its figures |
 
-## Summary of results
+## Results so far
 
-**Status (21 Oct 2026, Assessment 10):** the environment, smoke test, MDP, agent, baselines and analysis pipeline all work
-(see `report/` for captured output). The full dense-vs-sparse training runs and the held-out comparison are in progress.
-The WSL2 VM on our laptop crashes under sustained load, so training is crash-tolerant and resumes from saved state.
-This section is updated when results land.
+Baselines (`results/baselines.csv`, IR instruction counts, all counted the same way): `-Oz` gives the smallest code on
+every program we measured, and `-O3` is often *larger* than `-O2` because it optimises for speed. For example, bzip2:
+`-O0` 28748, `-O2` 20254, `-O3` 22098, `-Oz` 15973.
 
-Measured so far (`results/baselines.csv`, IR instruction counts, same counter for every column): `-Oz` is the smallest
-on every program measured, and `-O3` is often *larger* than `-O2` for size (e.g. bzip2: -O0 28748, -O2 20254, -O3 22098, -Oz 15973).
+The full training runs (dense vs sparse reward) and the comparison on held-out programs are still running. This section
+will be updated with the numbers, whether or not the agent beats `-O2`/`-O3`/`-Oz`.
 
-Exclusions, stated up front: `ghostscript`, `jpeg-c` and `jpeg-d` are excluded because measuring them crashed the
-8 GB WSL VM. CompilerGym's `env.validate()` does not work on this machine, so output correctness is checked with a
-disclosed, weaker `lli` comparison (see `SETUP.md`).
+Known limitations:
+
+- `ghostscript`, `jpeg-c` and `jpeg-d` are left out because measuring them crashed our WSL VM.
+- CompilerGym's built-in `validate()` doesn't work on our machine, so correctness is checked with a weaker `lli` output comparison.
+
+## Acknowledgement
+
+We used Claude (Anthropic) as an AI coding assistant for parts of the implementation and documentation. Commits made
+with its help are marked with a co-author line in the git history.
