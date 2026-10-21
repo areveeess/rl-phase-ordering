@@ -11,7 +11,7 @@ CHUNK="${CHUNK:-150}"
 say() { echo "[seeds $(date +%T)] $*"; }
 
 run_wsl() {
-  MSYS_NO_PATHCONV=1 timeout 1500 wsl -d Ubuntu -- bash -lc \
+  MSYS_NO_PATHCONV=1 timeout 1500 wsl -d Ubuntu --exec bash -lc \
     "cd \"$REPO_WSL\" && source ~/venvs/rlphase/bin/activate && export PYTHONWARNINGS=ignore && $1" 2>&1 \
     | tr -d '\0\r' | grep -E --line-buffered "resumed|done:|wrote|check|ok|MISMATCH|FAIL|PASS|Traceback|Error|benchmark'" | cut -c1-200
   return "${PIPESTATUS[0]}"
