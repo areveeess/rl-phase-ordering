@@ -1,0 +1,92 @@
+{
+  "test": [
+    "blowfish",
+    "bzip2",
+    "stringsearch",
+    "stringsearch2",
+    "tiff2bw",
+    "tiff2rgba",
+    "tiffdither",
+    "tiffmedian"
+  ],
+  "val": [
+    "bitcount",
+    "lame",
+    "patricia"
+  ],
+  "train": [
+    "adpcm",
+    "crc32",
+    "dijkstra",
+    "gsm",
+    "ispell",
+    "jpeg-c",
+    "jpeg-d",
+    "qsort",
+    "rijndael",
+    "sha",
+    "susan"
+  ],
+  "seed": 0,
+  "excluded": {
+    "ghostscript": "crashes the 8 GB WSL VM during baseline measurement"
+  },
+  "families": {
+    "adpcm": [
+      "adpcm"
+    ],
+    "bitcount": [
+      "bitcount"
+    ],
+    "blowfish": [
+      "blowfish"
+    ],
+    "bzip2": [
+      "bzip2"
+    ],
+    "crc32": [
+      "crc32"
+    ],
+    "dijkstra": [
+      "dijkstra"
+    ],
+    "gsm": [
+      "gsm"
+    ],
+    "ispell": [
+      "ispell"
+    ],
+    "jpeg": [
+      "jpeg-c",
+      "jpeg-d"
+    ],
+    "lame": [
+      "lame"
+    ],
+    "patricia": [
+      "patricia"
+    ],
+    "qsort": [
+      "qsort"
+    ],
+    "rijndael": [
+      "rijndael"
+    ],
+    "sha": [
+      "sha"
+    ],
+    "stringsearch": [
+      "stringsearch",
+      "stringsearch2"
+    ],
+    "susan": [
+      "susan"
+    ],
+    "tiff": [
+      "tiff2bw",
+      "tiff2rgba",
+      "tiffdither",
+      "tiffmedian"
+    ]
+  }
+}
