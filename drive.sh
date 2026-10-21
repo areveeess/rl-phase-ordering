@@ -11,7 +11,7 @@ CHUNK="${CHUNK:-150}"   # seconds of training per WSL call
 say() { echo "[drive $(date +%T)] $*"; }
 
 run_wsl() {  # run one command inside WSL with the venv; returns its exit code
-  MSYS_NO_PATHCONV=1 timeout 1500 wsl -d Ubuntu -- bash -lc \
+  MSYS_NO_PATHCONV=1 timeout 1500 wsl -d Ubuntu --exec bash -lc \
     "cd \"$REPO_WSL\" && source ~/venvs/rlphase/bin/activate && export PYTHONWARNINGS=ignore && $1" 2>&1 \
     | tr -d '\0\r' | grep -E --line-buffered "resumed|done:|wrote|chunk|Traceback|Error|candidate (0|10|20|30|40):|benchmark'" | cut -c1-200
   return "${PIPESTATUS[0]}"

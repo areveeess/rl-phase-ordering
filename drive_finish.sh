@@ -14,7 +14,7 @@ RUNS="dense_s0 sparse_s0 dense_s1 sparse_s1 dense_s2 sparse_s2"
 say() { echo "[finish $(date +%T)] $*"; }
 
 run_wsl() {
-  MSYS_NO_PATHCONV=1 timeout 1500 wsl -d Ubuntu -- bash -lc \
+  MSYS_NO_PATHCONV=1 timeout 1500 wsl -d Ubuntu --exec bash -lc \
     "cd \"$REPO_WSL\" && source ~/venvs/rlphase/bin/activate && export PYTHONWARNINGS=ignore && $1" 2>&1 \
     | tr -d '\0\r' | grep -E --line-buffered "done:|wrote|check|MISMATCH|FAIL|PASS|Traceback|Error" | cut -c1-200
   return "${PIPESTATUS[0]}"
