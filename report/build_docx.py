@@ -93,6 +93,10 @@ def table(rows, header, widths=None):
             cells[i].text = ""
             run = cells[i].paragraphs[0].add_run(str(v))
             run.font.size = Pt(9)
+    for row in t.rows[:-1]:  # keep short tables on one page
+        for c in row.cells:
+            for p in c.paragraphs:
+                p.paragraph_format.keep_with_next = True
     if widths:
         for row in t.rows:
             for i, w in enumerate(widths):
@@ -146,6 +150,7 @@ table([
 ], ["File", "Purpose"], widths=[5.0, 11.5])
 
 # ---------------- code ----------------
+doc.add_page_break()
 doc.add_heading("3. Sample code", level=1)
 para("3.1  One step of the phase-ordering MDP: apply a pass in CompilerGym, read the new instruction count, "
      "re-embed the IR with IR2Vec only if the pass changed it, and compute the dense or sparse reward.", bold=False)
