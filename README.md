@@ -27,7 +27,8 @@ bash run_all.sh                       # baselines, training, evaluation, plots -
 ```
 
 On our laptop the WSL VM kept crashing under long runs, so `drive.sh` (run from Git Bash on Windows) does the same
-steps in short chunks and resumes after a crash.
+steps in short chunks and resumes after a crash. `drive.sh` trains seed 0 of each reward mode; `drive_seeds.sh`, started
+after it, adds seeds 1 and 2, runs the reward-sum, leakage and overfit checks, and re-evaluates and analyses all six runs.
 
 ## Code
 
@@ -42,6 +43,7 @@ steps in short chunks and resumes after a crash.
 | `scripts/train.py` | Training (resumable) with checkpoint choice on the validation set |
 | `scripts/evaluate.py` | Runs the trained policy and replays each sequence to check it |
 | `scripts/analyze.py` | Tables and plots |
+| `scripts/overfit_check.py`, `leakage_check.py`, `reward_sum_check.py` | Pre-registered overfit rule, no test program in training or checkpoint choice, dense rewards sum to the sparse reward |
 | `report/` | Assessment 10 document and its figures |
 
 ## Results so far

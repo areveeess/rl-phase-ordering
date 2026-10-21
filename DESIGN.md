@@ -21,8 +21,8 @@
   8 test): `ghostscript` crashes the 8 GB WSL VM, and `jpeg-c`/`jpeg-d` crashed the WSL service twice during
   baseline measurement (and cost ~1.8 s per IR2Vec step). These exclusions were made before any evaluation.
 * **Baselines** (same counter): `-O0`, `-O2`, `-O3`, `-Oz` via the bundled `opt` on the `-O0` bitcode, then reloaded
-  into CompilerGym. Sanity baselines on the same action list: uniformly random sequences, and the best of 100 random
-  sequences selected on the training programs only and then applied unchanged everywhere.
+  into CompilerGym. Sanity baselines on the same action list: uniformly random sequences, and the best of 50 random
+  sequences (`--candidates 50` in `drive.sh`) selected on the training programs only and then applied unchanged everywhere.
 * **Agent**: checkpoint chosen by validation-set reduction (never test), rolled out greedily (argmax).
   Crashes count as no reduction and as losses. Every sequence is replayed from a fresh reset and must reproduce the count.
 * **Overfit check (pre-registered 2026-10-21, before the overfit run started)**: the learner is trained on only
