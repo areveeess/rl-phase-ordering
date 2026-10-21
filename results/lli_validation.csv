@@ -1,0 +1,121 @@
+run,benchmark,split,lli_check
+dense_s0,adpcm,train,not available
+dense_s0,crc32,train,match
+dense_s0,dijkstra,train,match
+dense_s0,gsm,train,not available
+dense_s0,ispell,train,not available
+dense_s0,qsort,train,match
+dense_s0,rijndael,train,not available
+dense_s0,sha,train,match
+dense_s0,susan,train,not available
+dense_s0,bitcount,val,match
+dense_s0,lame,val,not available
+dense_s0,patricia,val,not available
+dense_s0,blowfish,test,match
+dense_s0,bzip2,test,not available
+dense_s0,stringsearch,test,match
+dense_s0,stringsearch2,test,not available
+dense_s0,tiff2bw,test,not available
+dense_s0,tiff2rgba,test,not available
+dense_s0,tiffdither,test,not available
+dense_s0,tiffmedian,test,not available
+sparse_s0,adpcm,train,not available
+sparse_s0,crc32,train,match
+sparse_s0,dijkstra,train,match
+sparse_s0,gsm,train,not available
+sparse_s0,ispell,train,not available
+sparse_s0,qsort,train,match
+sparse_s0,rijndael,train,not available
+sparse_s0,sha,train,match
+sparse_s0,susan,train,not available
+sparse_s0,bitcount,val,match
+sparse_s0,lame,val,not available
+sparse_s0,patricia,val,not available
+sparse_s0,blowfish,test,match
+sparse_s0,bzip2,test,not available
+sparse_s0,stringsearch,test,match
+sparse_s0,stringsearch2,test,not available
+sparse_s0,tiff2bw,test,not available
+sparse_s0,tiff2rgba,test,not available
+sparse_s0,tiffdither,test,not available
+sparse_s0,tiffmedian,test,not available
+dense_s1,adpcm,train,not available
+dense_s1,crc32,train,match
+dense_s1,dijkstra,train,match
+dense_s1,gsm,train,not available
+dense_s1,ispell,train,not available
+dense_s1,qsort,train,match
+dense_s1,rijndael,train,not available
+dense_s1,sha,train,match
+dense_s1,susan,train,not available
+dense_s1,bitcount,val,match
+dense_s1,lame,val,not available
+dense_s1,patricia,val,not available
+dense_s1,blowfish,test,match
+dense_s1,bzip2,test,not available
+dense_s1,stringsearch,test,match
+dense_s1,stringsearch2,test,not available
+dense_s1,tiff2bw,test,not available
+dense_s1,tiff2rgba,test,not available
+dense_s1,tiffdither,test,not available
+dense_s1,tiffmedian,test,not available
+sparse_s1,adpcm,train,not available
+sparse_s1,crc32,train,match
+sparse_s1,dijkstra,train,match
+sparse_s1,gsm,train,not available
+sparse_s1,ispell,train,not available
+sparse_s1,qsort,train,match
+sparse_s1,rijndael,train,not available
+sparse_s1,sha,train,match
+sparse_s1,susan,train,not available
+sparse_s1,bitcount,val,match
+sparse_s1,lame,val,not available
+sparse_s1,patricia,val,not available
+sparse_s1,blowfish,test,match
+sparse_s1,bzip2,test,not available
+sparse_s1,stringsearch,test,match
+sparse_s1,stringsearch2,test,not available
+sparse_s1,tiff2bw,test,not available
+sparse_s1,tiff2rgba,test,not available
+sparse_s1,tiffdither,test,not available
+sparse_s1,tiffmedian,test,not available
+dense_s2,adpcm,train,not available
+dense_s2,crc32,train,match
+dense_s2,dijkstra,train,match
+dense_s2,gsm,train,not available
+dense_s2,ispell,train,not available
+dense_s2,qsort,train,match
+dense_s2,rijndael,train,not available
+dense_s2,sha,train,match
+dense_s2,susan,train,not available
+dense_s2,bitcount,val,match
+dense_s2,lame,val,not available
+dense_s2,patricia,val,not available
+dense_s2,blowfish,test,match
+dense_s2,bzip2,test,not available
+dense_s2,stringsearch,test,match
+dense_s2,stringsearch2,test,not available
+dense_s2,tiff2bw,test,not available
+dense_s2,tiff2rgba,test,not available
+dense_s2,tiffdither,test,not available
+dense_s2,tiffmedian,test,not available
+sparse_s2,adpcm,train,not available
+sparse_s2,crc32,train,match
+sparse_s2,dijkstra,train,match
+sparse_s2,gsm,train,not available
+sparse_s2,ispell,train,not available
+sparse_s2,qsort,train,match
+sparse_s2,rijndael,train,not available
+sparse_s2,sha,train,match
+sparse_s2,susan,train,not available
+sparse_s2,bitcount,val,match
+sparse_s2,lame,val,not available
+sparse_s2,patricia,val,not available
+sparse_s2,blowfish,test,match
+sparse_s2,bzip2,test,not available
+sparse_s2,stringsearch,test,match
+sparse_s2,stringsearch2,test,not available
+sparse_s2,tiff2bw,test,not available
+sparse_s2,tiff2rgba,test,not available
+sparse_s2,tiffdither,test,not available
+sparse_s2,tiffmedian,test,not available

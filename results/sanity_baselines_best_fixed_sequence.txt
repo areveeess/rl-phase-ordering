@@ -1,0 +1,1 @@
+-deadargelim -early-cse -licm -simplifycfg -globalopt -mergefunc -adce -sroa -licm -gvn -globaldce -mergefunc -instcombine -licm -indvars

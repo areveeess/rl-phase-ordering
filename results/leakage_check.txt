@@ -1,0 +1,7 @@
+runs/dense_s0: train=9 selection=['bitcount', 'lame', 'patricia'] test-overlap=none
+runs/dense_s1: train=9 selection=['bitcount', 'lame', 'patricia'] test-overlap=none
+runs/dense_s2: train=9 selection=['bitcount', 'lame', 'patricia'] test-overlap=none
+runs/sparse_s0: train=9 selection=['bitcount', 'lame', 'patricia'] test-overlap=none
+runs/sparse_s1: train=9 selection=['bitcount', 'lame', 'patricia'] test-overlap=none
+runs/sparse_s2: train=9 selection=['bitcount', 'lame', 'patricia'] test-overlap=none
+leakage check: OK (6 runs, no test program used in training or selection)

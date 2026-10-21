@@ -1,0 +1,4 @@
+benchmark,O0,Oz,final,fraction_of_Oz_reduction,pass
+crc32,242,114,124,0.9219,True
+qsort,638,316,346,0.9068,True
+adpcm,567,211,280,0.8062,True

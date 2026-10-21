@@ -1,0 +1,10 @@
+adpcm: dense 0.530864 sparse 0.530864 ok
+adpcm: dense 0.118166 sparse 0.118166 ok
+adpcm: dense 0.518519 sparse 0.518519 ok
+crc32: dense 0.425620 sparse 0.425620 ok
+crc32: dense -0.210744 sparse -0.210744 ok
+crc32: dense 0.103306 sparse 0.103306 ok
+dijkstra: dense 0.266667 sparse 0.266667 ok
+dijkstra: dense 0.368889 sparse 0.368889 ok
+dijkstra: dense -0.100000 sparse -0.100000 ok
+reward sum check: OK

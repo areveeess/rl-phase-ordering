@@ -46,19 +46,60 @@ after it, adds seeds 1 and 2, runs the reward-sum, leakage and overfit checks, a
 | `scripts/overfit_check.py`, `leakage_check.py`, `reward_sum_check.py` | Pre-registered overfit rule, no test program in training or checkpoint choice, dense rewards sum to the sparse reward |
 | `report/` | Assessment 10 document and its figures |
 
-## Results so far
+## Results
 
-Baselines (`results/baselines.csv`, IR instruction counts, all counted the same way): `-Oz` gives the smallest code on
-every program we measured, and `-O3` is often *larger* than `-O2` because it optimises for speed. For example, bzip2:
-`-O0` 28748, `-O2` 20254, `-O3` 22098, `-Oz` 15973.
+All numbers come from `scripts/analyze.py` ([results/RESULTS.md](results/RESULTS.md)). They use LLVM IR instruction
+counts from one counter for every column. The setup is 3 seeds per reward type, 320 training episodes per run, and the
+checkpoint chosen on the validation split. "Reduction" is 1 − geomean(final / `-O0`); higher is better.
 
-The full training runs (dense vs sparse reward) and the comparison on held-out programs are still running. This section
-will be updated with the numbers, whether or not the agent beats `-O2`/`-O3`/`-Oz`.
+**Held-out test programs (8 programs the agent never trained on):**
+
+| `-O2` | `-O3` | `-Oz` | random sequence | best fixed sequence | RL dense (3 seeds) | RL sparse (3 seeds) |
+|---|---|---|---|---|---|---|
+| 30.6% | 27.0% | **49.1%** | 19.9% | 47.3% | 38.2% ± 0.0 | 40.5% ± 3.2 |
+
+Wins/ties/losses of each RL run against each reference on the 8 test programs:
+
+| reference | RL dense, each seed | RL sparse, each seed |
+|---|---|---|
+| `-O2` | 6 / 1 / 1 | 7/0/1, 6/1/1, 6/1/1 |
+| `-O3` | 7 / 0 / 1 | 7 / 0 / 1 |
+| `-Oz` | 0 / 0 / 8 | 1/0/7, 0/0/8, 0/0/8 |
+| best fixed sequence | 0 / 0 / 8 | 0 / 0 / 8 |
+
+**What this means:**
+
+- **The learned policy beats `-O2` and `-O3` on code size on held-out programs, but loses to `-Oz`.** It also loses to a
+  single fixed random sequence picked on the training programs. `-O2`/`-O3` optimise for speed and often grow code
+  (on qsort, `-O2` gives 2323 instructions against 638 at `-O0`), so beating them on size is a low bar. `-Oz` is the honest
+  reference, and the agent does not reach it.
+- **The policy is not program-specific.** 5 of the 6 trained policies output the same greedy sequence for every program:
+  `-sroa` repeated 15 times, where only the first application changes anything. The sixth (sparse, seed 0) outputs
+  `-sroa` followed by `-gvn`. That is why the dense runs have zero spread: different weights, identical greedy output.
+- **Why: the policies are barely trained.** Policy entropy moved only from 3.22 to about 3.18 nats (the maximum for 25
+  actions is 3.22), so after 320 episodes the policy is still close to uniform. Greedy (argmax) evaluation turns its small
+  preference for `-sroa` into a one-pass sequence. A single `-sroa` already removes about 38% of the instructions, which is
+  enough to beat `-O2`/`-O3` on these programs.
+- **Dense vs sparse:** no meaningful difference. Sparse is ahead on average only because of one seed (sparse seed 0 found
+  `-sroa -gvn`).
+- **Overfit check (pre-registered rule: at least 80% of the `-Oz` reduction on crc32, qsort and adpcm):** PASS (0.92, 0.91,
+  0.81). The overfit policy is also `-sroa` ×15, so the rule turned out to be passable by a one-pass sequence. It was
+  fixed in advance and is reported as is ([results/overfit_check.txt](results/overfit_check.txt)).
+- **Checks:**
+  - All 120 evaluations replay to the same count from a fresh reset, with no crashes, and no program ends larger than `-O0`.
+  - The `lli` output comparison matched on all 42 sequences it could check; the other 78 are recorded as "not available".
+  - Dense step rewards sum exactly to the sparse reward ([results/reward_sum_check.txt](results/reward_sum_check.txt)).
+  - No test program was used for training or checkpoint selection ([results/leakage_check.txt](results/leakage_check.txt)).
+
+Plots: [training curves](results/training_curves.png), [entropy and NOOP use](results/entropy_noop.png),
+[held-out per program](results/heldout_per_program.png), [passes chosen](results/action_histogram.png).
 
 Known limitations:
 
+- The training budget (320 episodes, 20 policy updates) is far too small for REINFORCE to move away from a near-uniform policy.
 - `ghostscript`, `jpeg-c` and `jpeg-d` are left out because measuring them crashed our WSL VM.
 - CompilerGym's built-in `validate()` doesn't work on our machine, so correctness is checked with a weaker `lli` output comparison.
+- One benchmark suite (cBench, 20 of 23 programs), LLVM 10, IR instruction count only, greedy evaluation.
 
 ## Acknowledgement
 

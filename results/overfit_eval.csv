@@ -1,0 +1,4 @@
+run,reward,seed,split,benchmark,O0,final,sequence,noop_count,no_effect,replay_final,replay_ok,error
+overfit,dense,0,train,crc32,242,124,-sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa,0,14,124,True,
+overfit,dense,0,train,qsort,638,346,-sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa,0,14,346,True,
+overfit,dense,0,train,adpcm,567,280,-sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa -sroa,0,0,280,True,
