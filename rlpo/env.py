@@ -13,8 +13,9 @@ import tempfile
 
 import compiler_gym  # noqa: F401  (registers llvm-v0)
 import gym
-import ir2vec
 import numpy as np
+
+from rlpo import embed_worker
 
 # Curated action list: size-relevant passes that all appear in LLVM's -Oz pipeline.
 PASSES = [
@@ -49,7 +50,7 @@ def embed_ir(ir_text):
         f.write(ir_text)
         path = f.name
     try:
-        vec = np.asarray(ir2vec.initEmbedding(path, "fa", "p").getProgramVector(), dtype=np.float64)
+        vec = embed_worker.embed_file(path)
     finally:
         os.unlink(path)
     if vec.shape != (EMB_DIM,) or not np.all(np.isfinite(vec)):
@@ -81,6 +82,7 @@ class PhaseOrderingEnv:
 
     def close(self):
         self.env.close()
+        embed_worker.close()
 
     def _embedding(self):
         key = (self.uri, hashlib.sha1(",".join(map(str, self.prefix)).encode()).hexdigest())
