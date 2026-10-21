@@ -47,11 +47,16 @@ try:
 
     # CompilerGym's validate() is tried first. On this machine it fails inside its own
     # sanitizer runs (see SETUP.md), so the disclosed lli output check is the gate.
-    try:
-        result = env.validate()
-        validate_ok, detail = result.okay(), str(result)[:120]
-    except Exception as e:  # noqa: BLE001
-        validate_ok, detail = False, f"{type(e).__name__}: {e}"[:120]
+    # Opt-in only: on this machine validate()'s sanitizer runs have crashed the WSL service.
+    validate_ok = False
+    if "--try-validate" in sys.argv:
+        try:
+            result = env.validate()
+            validate_ok, detail = result.okay(), str(result)[:120]
+        except Exception as e:  # noqa: BLE001
+            detail = f"{type(e).__name__}: {e}"[:120]
+    else:
+        detail = "skipped (pass --try-validate); see SETUP.md"
     print(f"[{'PASS' if validate_ok else 'INFO'}] env.validate(): {detail}", flush=True)
     if not validate_ok:
         seq = [ACTIONS.index(p) for p in ("-mem2reg", "-instcombine", "-simplifycfg", "-gvn")]

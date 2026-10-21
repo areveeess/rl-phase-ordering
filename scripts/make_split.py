@@ -35,8 +35,17 @@ for f in fams:
         n_val += len(progs)
     else:
         split["train"] += progs
+# Budget rule, fixed before any evaluation: an IR2Vec embedding of the 62k-instruction
+# jpeg programs takes ~1.8 s per step, too slow to train on in a 1-hour budget, so the
+# jpeg family moves from train to the held-out test set (it stays unseen in training).
+TOO_LARGE_TO_TRAIN = ["jpeg"]
+for f in TOO_LARGE_TO_TRAIN:
+    if FAMILIES[f][0] in split["train"]:
+        split["train"] = [p for p in split["train"] if p not in FAMILIES[f]]
+        split["test"] += FAMILIES[f]
 for k in split:
     split[k].sort()
+split["moved_to_test"] = {f: "IR2Vec cost ~1.8 s/step; too slow to train on" for f in TOO_LARGE_TO_TRAIN}
 split["seed"] = SEED
 split["excluded"] = EXCLUDED
 split["families"] = FAMILIES

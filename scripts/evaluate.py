@@ -33,9 +33,12 @@ def main():
     ap.add_argument("runs", nargs="+")
     ap.add_argument("--out", default="results/eval.csv")
     ap.add_argument("--splits", nargs="+", default=["train", "val", "test"])
+    ap.add_argument("--programs", nargs="+", help="evaluate these programs only (labelled 'train')")
     args = ap.parse_args()
 
     split = json.load(open("splits/split.json"))
+    if args.programs:
+        split, args.splits = {"train": args.programs}, ["train"]
     env = PhaseOrderingEnv()
     renv = make_env()
     rows = []

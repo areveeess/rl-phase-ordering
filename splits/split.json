@@ -2,6 +2,8 @@
   "test": [
     "blowfish",
     "bzip2",
+    "jpeg-c",
+    "jpeg-d",
     "stringsearch",
     "stringsearch2",
     "tiff2bw",
@@ -20,13 +22,14 @@
     "dijkstra",
     "gsm",
     "ispell",
-    "jpeg-c",
-    "jpeg-d",
     "qsort",
     "rijndael",
     "sha",
     "susan"
   ],
+  "moved_to_test": {
+    "jpeg": "IR2Vec cost ~1.8 s/step; too slow to train on"
+  },
   "seed": 0,
   "excluded": {
     "ghostscript": "crashes the 8 GB WSL VM during baseline measurement"

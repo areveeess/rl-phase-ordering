@@ -42,6 +42,7 @@ def main():
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
+    torch.set_num_threads(1)  # several runs share the CPU
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
