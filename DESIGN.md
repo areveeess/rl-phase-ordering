@@ -17,14 +17,21 @@
 
 * **Split** (`splits/split.json`, seed 0): cBench families shuffled, then assigned to test, validation, train.
   Near-duplicates (jpeg-c/d, stringsearch/2, the four tiff tools) always stay together.
-  `jpeg-c`/`jpeg-d` were moved from train to test because their embedding cost (~1.8 s per step) made them
-  untrainable within budget, and `ghostscript` is excluded because it crashes the 8 GB WSL VM.
-  Both decisions were made before any evaluation.
+  Three programs are excluded entirely, so the split has 20 of the 23 cBench programs (9 train, 3 validation,
+  8 test): `ghostscript` crashes the 8 GB WSL VM, and `jpeg-c`/`jpeg-d` crashed the WSL service twice during
+  baseline measurement (and cost ~1.8 s per IR2Vec step). These exclusions were made before any evaluation.
 * **Baselines** (same counter): `-O0`, `-O2`, `-O3`, `-Oz` via the bundled `opt` on the `-O0` bitcode, then reloaded
   into CompilerGym. Sanity baselines on the same action list: uniformly random sequences, and the best of 100 random
   sequences selected on the training programs only and then applied unchanged everywhere.
 * **Agent**: checkpoint chosen by validation-set reduction (never test), rolled out greedily (argmax).
   Crashes count as no reduction and as losses. Every sequence is replayed from a fresh reset and must reproduce the count.
+* **Overfit check (pre-registered 2026-10-21, before the overfit run started)**: the learner is trained on only
+  `crc32`, `qsort` and `adpcm` (dense reward, seed 0, 320 episodes) and evaluated greedily on those same programs.
+  It **passes** if, on each of the three programs, its size reduction from `-O0` is at least 80% of the `-Oz`
+  reduction (`(O0 - final) >= 0.8 * (O0 - Oz)`, counts from `results/baselines.csv`). The threshold is fixed here and
+  is not changed after seeing the result; `scripts/overfit_check.py` applies it and a fail is reported as a fail.
+* **Training budget**: every run (dense and sparse, seeds 0, 1, 2) uses the same 320 episodes (20 updates of 16),
+  3 checkpoints, and the same hyperparameters.
 * **Reported**: geomean size reduction vs `-O0`, and wins/ties/losses against `-O2`, `-O3`, `-Oz` and the best fixed sequence,
   per seed, on train / validation / held-out test.
 
@@ -62,5 +69,5 @@ and a small training budget. The comparison is still useful because it shows how
 
 ## Limitations
 
-Small budget (800 episodes per run, 3 seeds), one benchmark suite (cBench, 22 of 23 programs), LLVM 10, IR instruction count only,
+Small budget (320 episodes per run, 3 seeds), one benchmark suite (cBench, 20 of 23 programs), LLVM 10, IR instruction count only,
 greedy evaluation, and validation by `lli` on a subset of programs.

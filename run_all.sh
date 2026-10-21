@@ -7,7 +7,7 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 export PYTHONWARNINGS=ignore
-EPISODES="${EPISODES:-480}"
+EPISODES="${EPISODES:-320}"
 L="$HOME/rlphase-logs"
 mkdir -p "$L" runs results
 step() { echo "[run_all $(date +%T)] $*"; }
@@ -24,14 +24,14 @@ for seed in 0 1 2; do
   for mode in dense sparse; do
     if [ ! -f "runs/${mode}_s$seed/policy.pt" ]; then
       python scripts/train.py --reward "$mode" --seed "$seed" --episodes "$EPISODES" \
-        --out "runs/${mode}_s$seed" > "$L/${mode}_s$seed.log" 2>&1 &
+        --checkpoints 3 --out "runs/${mode}_s$seed" > "$L/${mode}_s$seed.log" 2>&1 &
     fi
   done
   wait
   step "seed $seed done"; grep -h "done:" "$L"/*_s$seed.log
 done
 step "overfit check and -O baselines"
-[ -f runs/overfit/policy.pt ] || python scripts/train.py --reward dense --seed 0 --episodes 480 --checkpoints 1 \
+[ -f runs/overfit/policy.pt ] || python scripts/train.py --reward dense --seed 0 --episodes 320 --checkpoints 1 \
   --train-on crc32 qsort adpcm --out runs/overfit > "$L/overfit.log" 2>&1 &
 python scripts/baselines.py > "$L/baselines.log" 2>&1 &
 wait
