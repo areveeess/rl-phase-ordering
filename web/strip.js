@@ -73,6 +73,7 @@
 
     var container = document.createElement('div');
     container.className = 'strip-row';
+    container.setAttribute('data-ui', 'true');
     container.setAttribute('tabindex', '0');
     container.setAttribute('role', 'img');
     container.setAttribute('aria-label', formatAriaLabel(label, program, sequence, noEffectCount, final));

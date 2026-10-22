@@ -275,7 +275,7 @@
     var pitch = 44;
     var subH = opts.subheader ? 28 : 0;
     var axisH = 26;
-    var padT = 8;
+    var padT = (opts.reference && opts.reference.label) ? 22 : 8;
     var padB = 8;
     var totalH = padT + (rows.length * pitch) + subH + axisH + padB;
 
@@ -378,7 +378,7 @@
       if (opts.reference.label) {
         var refTxt = s('text', {
           x: rx.toFixed(1),
-          y: String(padT - 2),
+          y: String(padT - 6),
           'text-anchor': 'middle',
           'font-size': '11',
           fill: tokens.muted
@@ -475,6 +475,15 @@
           fill: tokens.text
         }, grp);
         valEl.textContent = valText;
+      } else {
+        var dashEl = s('text', {
+          x: (barX0 + 8).toFixed(1),
+          y: String(cy + 4),
+          'font-size': '12',
+          'font-weight': '400',
+          fill: tokens.muted
+        }, grp);
+        dashEl.textContent = '-';
       }
 
       if (r.note) {

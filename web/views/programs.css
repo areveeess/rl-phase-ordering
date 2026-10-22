@@ -1,0 +1,226 @@
+/* programs.css — Layout and styling for Programs view */
+
+.programs-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl, 32px);
+}
+
+.programs-layout {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-md, 16px);
+  align-items: start;
+}
+
+/* Sidebar program list (Desktop span 3) */
+.programs-nav-col {
+  grid-column: span 3;
+  position: sticky;
+  top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+.programs-group-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 8px 8px 4px 8px;
+  text-transform: none;
+}
+
+.programs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.programs-list:last-child {
+  margin-bottom: 0;
+}
+
+.programs-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 14px;
+  transition: background 120ms ease, outline 120ms ease;
+  outline: 1px solid transparent;
+}
+
+.programs-list-item:hover {
+  outline: 1px solid var(--control);
+}
+
+.programs-list-item[aria-selected="true"],
+.programs-list-item.is-selected {
+  background: var(--active);
+  font-weight: 500;
+}
+
+.programs-list-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.programs-item-o0 {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mobile chooser (<640px) */
+.programs-mobile-chooser {
+  display: none;
+  grid-column: span 12;
+  margin-bottom: 8px;
+}
+
+.programs-mobile-chooser-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.programs-mobile-chooser-row select {
+  flex: 1;
+  height: 44px;
+}
+
+.programs-mobile-chooser-row button {
+  height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+}
+
+/* Detail column (Desktop span 9) */
+.programs-detail-col {
+  grid-column: span 9;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg, 24px);
+}
+
+.programs-detail-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.programs-detail-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.programs-detail-o0 {
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.programs-finding {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text);
+  margin: 0;
+  max-width: 80ch;
+}
+
+.programs-empty-notice {
+  margin-bottom: 16px;
+}
+
+/* Sequence strip card additions */
+.programs-strip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.programs-strip-subheader {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+
+.programs-strip-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.programs-strip-details summary {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.programs-strip-details summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.programs-details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.programs-details-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Phone strip view */
+.programs-phone-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.programs-phone-select {
+  height: 44px;
+  width: 100%;
+}
+
+/* Responsive folding */
+@media (max-width: 1100px) {
+  .programs-nav-col {
+    grid-column: span 12;
+    position: static;
+    max-height: none;
+  }
+  .programs-detail-col {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 640px) {
+  .programs-nav-col {
+    display: none;
+  }
+  .programs-mobile-chooser {
+    display: block;
+  }
+}
