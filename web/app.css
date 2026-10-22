@@ -298,15 +298,22 @@ code, pre, .mono { font-family: var(--font-mono); }
 .filter-row .stamp { color: var(--faint); font-size: var(--fs-small); }
 
 /* ---------- grid (12-column) ---------- */
-.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--gap); }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--gap); align-items: start; }
 .grid.top { align-items: start; }
 .span-3  { grid-column: span 3; }
 .span-4  { grid-column: span 4; }
 .span-5  { grid-column: span 5; }
+.span-6  { grid-column: span 6; }
 .span-7  { grid-column: span 7; }
 .span-8  { grid-column: span 8; }
 .span-9  { grid-column: span 9; }
 .span-12 { grid-column: span 12; }
+
+@media (max-width: 1100px) {
+  .span-4 { grid-column: span 6; }
+  .span-4:nth-child(3) { grid-column: span 12; }
+  .span-6 { grid-column: span 12; }
+}
 
 /* ---------- card ---------- */
 .card {
@@ -322,25 +329,34 @@ code, pre, .mono { font-family: var(--font-mono); }
 }
 .card-title { font-size: var(--fs-heading); line-height: 24px; font-weight: 500; }
 .card-sub { font-size: var(--fs-small); line-height: 16px; color: var(--muted); }
+.card-note, .checks-note {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+}
 
 /* ---------- table ---------- */
 .table-frame { overflow-x: auto; }
-.card table { width: 100%; border-collapse: collapse; }
-.card th {
+table.table, .table-frame table, .card table { width: 100%; border-collapse: collapse; }
+.card th, table.table th {
   height: 36px; padding: 0 12px;
   text-align: left; font-weight: 400;
   font-size: var(--fs-small); line-height: 16px;
   color: var(--muted); white-space: nowrap;
 }
-.card td {
+.card td, table.table td {
   padding: 12px; height: var(--row-height);
   border-bottom: 1px solid var(--rule);
   vertical-align: baseline;
   font-size: var(--fs-body); line-height: 20px;
 }
-.card tbody tr:last-child td { border-bottom: 0; }
-.card tbody tr[aria-selected="true"] td { background: var(--active); }
-.card th.num-col, .card td.num-col { text-align: right; font-variant-numeric: tabular-nums; }
+.card td.top, table.table td.top { vertical-align: top; }
+.card tbody tr:last-child td, table.table tbody tr:last-child td { border-bottom: 0; }
+.card tbody tr[aria-selected="true"] td, table.table tbody tr[aria-selected="true"] td { background: var(--active); }
+.card th.num-col, .card td.num-col, table.table th.num-col, table.table td.num-col { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* key-value list */
 .kv-list { display: flex; flex-direction: column; }
@@ -511,11 +527,13 @@ code, pre, .mono { font-family: var(--font-mono); }
 }
 
 /* ---------- sequence strip (shared) ---------- */
-.strip-row {
+.strip-row, .strip-live {
   display: flex; flex-direction: column; gap: 4px;
   margin-bottom: 12px; outline: none;
+  max-width: 100%; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.strip-row:focus-visible {
+.strip-row:focus-visible, .strip-live:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 4px;
 }
 .strip-row-head {

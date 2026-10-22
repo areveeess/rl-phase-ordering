@@ -19,10 +19,6 @@
   gap: var(--space-md, 16px);
 }
 
-.training-chart-col {
-  grid-column: span 4;
-}
-
 .training-chart-header-extra {
   display: flex;
   align-items: center;
@@ -46,19 +42,7 @@
 }
 
 /* Responsive folding */
-@media (max-width: 1100px) {
-  .training-chart-col {
-    grid-column: span 6;
-  }
-  .training-chart-col:nth-child(3) {
-    grid-column: span 12;
-  }
-}
-
 @media (max-width: 640px) {
-  .training-chart-col {
-    grid-column: span 12;
-  }
   .training-chart-box {
     min-height: 180px;
   }

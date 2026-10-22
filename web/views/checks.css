@@ -68,15 +68,6 @@
   color: var(--text);
 }
 
-.checks-note {
-  margin-top: 14px;
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--muted);
-  border-top: 1px solid var(--rule);
-  padding-top: 12px;
-}
-
 .overfit-rule-statement {
   font-size: 14px;
   line-height: 20px;
