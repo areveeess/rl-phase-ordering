@@ -1,0 +1,223 @@
+/* web/views/live.css — Styling for Live run tab */
+
+.view-live {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Controls row */
+.live-controls-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card, 8px);
+  padding: 16px;
+}
+
+.live-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.live-control-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Steps card */
+.live-strip-wrap {
+  margin-bottom: 20px;
+}
+
+.live-empty-prompt {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.live-chart-box {
+  border-top: 1px solid var(--rule);
+  padding-top: 16px;
+}
+
+.live-chart-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.live-chart-frame {
+  width: 100%;
+  height: 180px;
+}
+
+.live-chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Result card states */
+.live-offline-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.live-offline-text {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.live-code-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--raised);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.live-code-block pre {
+  margin: 0;
+  overflow-x: auto;
+}
+
+.live-code-block code {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.live-copy-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+  height: 30px;
+  white-space: nowrap;
+}
+
+.live-offline-hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.live-offline-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.live-last-checked {
+  font-size: 12px;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-ready-prompt {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.live-status-msg {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.live-running-timer {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.live-done-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.live-final-heading {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.live-final-count {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-match-pill-wrap {
+  margin-top: 4px;
+}
+
+.live-match-detail {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.live-run-meta {
+  font-size: 12px;
+  color: var(--faint);
+  margin-top: 8px;
+}
+
+.live-error-block,
+.live-lost-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.live-error-glyph {
+  font-size: 16px;
+  color: var(--negative);
+  line-height: 1;
+}
+
+.live-error-msg,
+.live-error-text {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
+  .view-live .span-8 {
+    grid-column: span 12;
+  }
+
+  .view-live .span-4 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 768px) {
+  .live-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .live-controls-row select {
+    height: 44px;
+  }
+}

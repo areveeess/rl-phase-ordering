@@ -206,7 +206,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 5. Dense vs Sparse Training | 0/0 (outside GSD) | Complete (evidence) | 2026-10-22 |
 | 6. Evaluation and Failure Analysis | 0/0 (outside GSD) | Complete (evidence) | 2026-10-22 |
 | 7. Final Outputs | 0/0 (outside GSD) | Complete (evidence) | 2026-10-22 |
-| 8. Web Frontend | 7/11 | In Progress | - |
+| 8. Web Frontend | 9/11 | In Progress | - |
 
 ### Phase 8: Web Frontend
 
@@ -220,7 +220,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
   5. The README documents how to open the explorer and how to start the live server. The page works at phone width and in light/dark mode.
 
 **Depends on:** Phase 7
-**Plans:** 7/11 plans executed
+**Plans:** 9/11 plans executed
 
 Plans:
 - [x] 08-01-PLAN.md — Tracer + data contract: export_web.py -> data.json/data.js -> Overview summary table, check_web.py, render_check.py (wave 1)
@@ -230,7 +230,7 @@ Plans:
 - [x] 08-05-PLAN.md — Overview complete with honest headline; charts-ext.js marks and the sequence strip component (wave 3)
 - [x] 08-06-PLAN.md — Live server web/server.py (stdlib, 127.0.0.1, NDJSON, one run at a time) with tests and live_check (wave 3)
 - [x] 08-07-PLAN.md — Programs view: per-program bar list, finding, pass-sequence strips, phone step table (wave 4)
-- [ ] 08-08-PLAN.md — Training, Checks, and Split-and-method views (wave 4)
-- [ ] 08-09-PLAN.md — Live tab UI: probe, states, streaming run, browser end-to-end check (wave 5)
+- [x] 08-08-PLAN.md — Training, Checks, and Split-and-method views (wave 4)
+- [x] 08-09-PLAN.md — Live tab UI: probe, states, streaming run, browser end-to-end check (wave 5)
 - [ ] 08-10-PLAN.md — Cross-route taste-skill gate: 6 routes x 2 themes x 3 widths to 0 FAIL, fixes in shared files only, critique (wave 6)
 - [ ] 08-11-PLAN.md — README Frontend section, manual GitHub Pages workflow, final acceptance sweep mapped to SC1-SC5 (wave 7)

@@ -158,20 +158,20 @@ class RealCompilerGymRunner:
 
     def run(self, run_meta, program, stored_final):
         t0 = time.time()
-        env = self._ensure_env()
-
-        # Import agent & torch lazily
-        import torch
-        from rlpo.agent import PolicyValueNet
-        from rlpo.env import ACTIONS, STATE_DIM
-
-        policy_path = run_meta["path"]
-        net = PolicyValueNet(STATE_DIM, len(ACTIONS))
-        net.load_state_dict(torch.load(policy_path, map_location="cpu", weights_only=True))
-        net.eval()
-
         current_step = 0
         try:
+            env = self._ensure_env()
+
+            # Import agent & torch lazily
+            import torch
+            from rlpo.agent import PolicyValueNet
+            from rlpo.env import ACTIONS, STATE_DIM
+
+            policy_path = run_meta["path"]
+            net = PolicyValueNet(STATE_DIM, len(ACTIONS))
+            net.load_state_dict(torch.load(policy_path, map_location="cpu", weights_only=True))
+            net.eval()
+
             s = env.reset(program)
             yield {
                 "type": "start",
@@ -195,6 +195,7 @@ class RealCompilerGymRunner:
                     "count": env.count,
                     "no_effect": bool(step_no_effect)
                 }
+                time.sleep(0.35)
 
             elapsed = round(time.time() - t0, 3)
             yield {
@@ -515,6 +516,8 @@ def main():
         log_f = open(args.logfile, "a+", encoding="utf-8")
         os.dup2(log_f.fileno(), sys.stdout.fileno())
         os.dup2(log_f.fileno(), sys.stderr.fileno())
+
+    if args.pidfile:
         with open(args.pidfile, "w", encoding="utf-8") as f:
             f.write(str(os.getpid()))
 
@@ -529,7 +532,13 @@ def main():
     finally:
         server.server_close()
         server.runner.close()
+        if args.pidfile and os.path.exists(args.pidfile):
+            try:
+                os.remove(args.pidfile)
+            except OSError:
+                pass
         print("Server shutdown complete.", flush=True)
+        os._exit(0)
 
 
 if __name__ == "__main__":

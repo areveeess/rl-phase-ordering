@@ -10,8 +10,13 @@ set -e
 CMD="${1:-status}"
 PORT="${2:-8765}"
 
-WIN_M=$(cygpath -m "$PWD")
-WSL_REPO_PATH=$(wsl -d Ubuntu --exec wslpath -a "$WIN_M" | tr -d '\r')
+WSL_REPO_PATH="/mnt/c/Users/rvsre/Documents/compiler project"
+if command -v wsl >/dev/null 2>&1; then
+  DETECTED=$(wsl -d Ubuntu --exec pwd 2>/dev/null | tr -d '\r')
+  if [ -n "$DETECTED" ] && [ "$DETECTED" != "/" ]; then
+    WSL_REPO_PATH="$DETECTED"
+  fi
+fi
 
 case "$CMD" in
   start)
@@ -26,17 +31,17 @@ case "$CMD" in
       fi
     "
 
-    # Start using native double-fork daemonization
+    # Start server in background with persistent WSL client to prevent VM idle shutdown
     wsl -d Ubuntu --exec bash -c "
       cd '$WSL_REPO_PATH'
       source ~/venvs/rlphase/bin/activate
-      python web/server.py --port $PORT --daemon --pidfile /tmp/phase-ordering-live.pid --logfile /tmp/phase-ordering-live.log
-    "
+      python web/server.py --port $PORT --pidfile /tmp/phase-ordering-live.pid --logfile /tmp/phase-ordering-live.log
+    " >/dev/null 2>&1 &
 
-    echo "==> Waiting for server health check on http://localhost:${PORT}/api/health (up to 90s)..."
+    echo "==> Waiting for server health check on http://127.0.0.1:${PORT}/api/health (up to 90s)..."
     READY=0
     for i in $(seq 1 90); do
-      if curl -s "http://localhost:${PORT}/api/health" | grep -q '"ok"[[:space:]]*:[[:space:]]*true'; then
+      if curl -s "http://127.0.0.1:${PORT}/api/health" | grep -q '"ok"[[:space:]]*:[[:space:]]*true'; then
         READY=1
         break
       fi
@@ -44,7 +49,7 @@ case "$CMD" in
     done
 
     if [ "$READY" -eq 1 ]; then
-      echo "Live server is ready on http://localhost:${PORT}/"
+      echo "Live server is ready on http://127.0.0.1:${PORT}/"
       exit 0
     else
       echo "ERROR: Server failed to start within 90s. Log tail:" >&2
@@ -64,7 +69,7 @@ case "$CMD" in
             if ! kill -0 \"\$PID\" 2>/dev/null; then
               break
             fi
-            sleep 1
+            sleep 0.2
           done
           kill -9 \"\$PID\" 2>/dev/null || true
         fi
@@ -76,6 +81,7 @@ case "$CMD" in
     echo "==> Checking for leftover compiler_gym-llvm-service processes..."
     LEFTOVER=$(wsl -d Ubuntu --exec bash -c "pgrep -fc '[c]ompiler_gym-llvm-service'" || true)
     LEFTOVER=$(echo "$LEFTOVER" | tr -d '\r')
+    LEFTOVER="${LEFTOVER:-0}"
     if [ "$LEFTOVER" -ne 0 ]; then
       echo "ERROR: Found $LEFTOVER leftover compiler_gym-llvm-service process(es) in WSL!" >&2
       wsl -d Ubuntu --exec bash -c "pgrep -fl '[c]ompiler_gym-llvm-service'" >&2 || true
@@ -86,8 +92,8 @@ case "$CMD" in
     ;;
 
   status)
-    echo "==> Checking status on http://localhost:${PORT}/api/health..."
-    curl -s "http://localhost:${PORT}/api/health" || echo "Server not reachable"
+    echo "==> Checking status on http://127.0.0.1:${PORT}/api/health..."
+    curl -s "http://127.0.0.1:${PORT}/api/health" || echo "Server not reachable"
     echo ""
     ;;
 

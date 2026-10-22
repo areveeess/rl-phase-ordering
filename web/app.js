@@ -565,6 +565,7 @@
     },
 
     notice: function (opts) {
+      if (typeof opts === 'string') opts = { text: opts };
       opts = opts || {};
       var kids = [h('span', null, opts.text || '')];
       if (opts.action) kids.push(opts.action);
