@@ -1,0 +1,65 @@
+/* training.css — Layout and styling for Training view */
+
+.training-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl, 32px);
+}
+
+.training-tabs-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.training-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-md, 16px);
+}
+
+.training-chart-col {
+  grid-column: span 4;
+}
+
+.training-chart-header-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.training-chart-box {
+  min-height: 240px;
+  width: 100%;
+}
+
+.training-segmented-ctrl {
+  margin-bottom: 8px;
+}
+
+/* Run table & Validation table adjustments */
+.training-table-card {
+  width: 100%;
+}
+
+/* Responsive folding */
+@media (max-width: 1100px) {
+  .training-chart-col {
+    grid-column: span 6;
+  }
+  .training-chart-col:nth-child(3) {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 640px) {
+  .training-chart-col {
+    grid-column: span 12;
+  }
+  .training-chart-box {
+    min-height: 180px;
+  }
+}

@@ -1,0 +1,162 @@
+/* web/views/method.css — Styling for Split and method view */
+
+.view-method {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.view-method .grid {
+  align-items: start;
+}
+
+/* 32px Program split rows */
+.split-prog-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.split-prog-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.split-prog-row:last-child {
+  border-bottom: none;
+}
+
+.split-prog-name {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.split-prog-name:hover {
+  text-decoration: underline;
+}
+
+.split-prog-o0 {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+
+/* Excluded programs */
+.excluded-table {
+  width: 100%;
+}
+
+.excluded-name-td {
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.excluded-reason-td {
+  vertical-align: top;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Actions and pass chips */
+.actions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.actions-summary-line {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pass-chips-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pass-chip {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 2px 6px;
+  background-color: var(--raised);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--font-mono, monospace);
+}
+
+.pass-chip-noop {
+  font-weight: 600;
+  border: 1px solid var(--control);
+}
+
+/* Where to read more links */
+.doc-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-link-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  background-color: var(--raised);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 120ms ease;
+}
+
+.doc-link-card:hover {
+  border-color: var(--control);
+  text-decoration: none;
+}
+
+.doc-link-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.doc-link-name {
+  color: var(--text);
+}
+
+.doc-link-arrow {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.doc-link-desc {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1100px) {
+  .view-method .span-4 {
+    grid-column: span 12;
+  }
+
+  .view-method .span-6 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 768px) {
+  .doc-link-title {
+    font-size: 13px;
+  }
+}

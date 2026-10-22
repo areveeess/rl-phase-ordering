@@ -1,0 +1,153 @@
+/* web/views/checks.css — Styling for Checks view */
+
+.view-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.checks-table {
+  width: 100%;
+}
+
+.checks-td-name {
+  font-weight: 500;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.check-name-title {
+  color: var(--text);
+}
+
+.check-name-mobile-source {
+  display: none;
+}
+
+.checks-td-desc {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+  max-width: 440px;
+  vertical-align: top;
+}
+
+.checks-td-result {
+  vertical-align: top;
+}
+
+.checks-td-source {
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.check-result-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.check-result-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.check-result-sub {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.check-result-text {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.checks-note {
+  margin-top: 14px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+}
+
+.overfit-rule-statement {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.overfit-finding {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.benchmark-link {
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.benchmark-link:hover {
+  text-decoration: underline;
+}
+
+/* Two-line rows on phone */
+@media (max-width: 768px) {
+  .checks-table thead {
+    display: none;
+  }
+
+  .checks-tr {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+    gap: 4px;
+  }
+
+  .checks-tr:last-child {
+    border-bottom: none;
+  }
+
+  .checks-tr td {
+    padding: 2px 0;
+    border: none;
+  }
+
+  .checks-td-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+  }
+
+  .check-name-mobile-source {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .checks-td-desc {
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .checks-td-source {
+    display: none;
+  }
+
+  .checks-td-result {
+    margin-top: 2px;
+  }
+}
