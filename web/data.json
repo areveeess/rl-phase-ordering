@@ -1,0 +1,148 @@
+{
+ "schema": 1,
+ "built": "2026-10-22",
+ "commit": "249f957fe8f53bff14d449e338affefb656bfd20",
+ "sources": [
+  "splits/split.json",
+  "results/summary_reduction.csv"
+ ],
+ "split": {
+  "test": [
+   "blowfish",
+   "bzip2",
+   "stringsearch",
+   "stringsearch2",
+   "tiff2bw",
+   "tiff2rgba",
+   "tiffdither",
+   "tiffmedian"
+  ],
+  "val": [
+   "bitcount",
+   "lame",
+   "patricia"
+  ],
+  "train": [
+   "adpcm",
+   "crc32",
+   "dijkstra",
+   "gsm",
+   "ispell",
+   "qsort",
+   "rijndael",
+   "sha",
+   "susan"
+  ],
+  "seed": 0,
+  "excluded": {
+   "ghostscript": "crashes the 8 GB WSL VM during baseline measurement",
+   "jpeg-c": "baseline measurement crashed the WSL service twice; ~1.8 s per IR2Vec step",
+   "jpeg-d": "baseline measurement crashed the WSL service twice; ~1.8 s per IR2Vec step"
+  },
+  "families": {
+   "adpcm": [
+    "adpcm"
+   ],
+   "bitcount": [
+    "bitcount"
+   ],
+   "blowfish": [
+    "blowfish"
+   ],
+   "bzip2": [
+    "bzip2"
+   ],
+   "crc32": [
+    "crc32"
+   ],
+   "dijkstra": [
+    "dijkstra"
+   ],
+   "gsm": [
+    "gsm"
+   ],
+   "ispell": [
+    "ispell"
+   ],
+   "jpeg": [
+    "jpeg-c",
+    "jpeg-d"
+   ],
+   "lame": [
+    "lame"
+   ],
+   "patricia": [
+    "patricia"
+   ],
+   "qsort": [
+    "qsort"
+   ],
+   "rijndael": [
+    "rijndael"
+   ],
+   "sha": [
+    "sha"
+   ],
+   "stringsearch": [
+    "stringsearch",
+    "stringsearch2"
+   ],
+   "susan": [
+    "susan"
+   ],
+   "tiff": [
+    "tiff2bw",
+    "tiff2rgba",
+    "tiffdither",
+    "tiffmedian"
+   ]
+  }
+ },
+ "summary": [
+  {
+   "split": "train",
+   "programs": 9,
+   "O2": 0.21813183233399913,
+   "O3": 0.14398826356563388,
+   "Oz": 0.5008556838632569,
+   "random": 0.21058954734667212,
+   "best_fixed": 0.5073612391799236,
+   "dense_mean": 0.39501641300731616,
+   "dense_sd": 0.0,
+   "sparse_mean": 0.39456844565470606,
+   "sparse_sd": 0.0006335215055616281,
+   "long_dense": null,
+   "long_sparse": null
+  },
+  {
+   "split": "val",
+   "programs": 3,
+   "O2": 0.40413576706782917,
+   "O3": 0.32070670441202387,
+   "Oz": 0.5886810737405217,
+   "random": 0.24031544937673344,
+   "best_fixed": 0.55957161881543,
+   "dense_mean": 0.3927174426527424,
+   "dense_sd": 5.551115123125783e-17,
+   "sparse_mean": 0.4211117353510181,
+   "sparse_sd": 0.04015559382789287,
+   "long_dense": null,
+   "long_sparse": null
+  },
+  {
+   "split": "test",
+   "programs": 8,
+   "O2": 0.30597860239504127,
+   "O3": 0.2700068731616412,
+   "Oz": 0.49115575813267254,
+   "random": 0.1986009018752759,
+   "best_fixed": 0.47343442381767176,
+   "dense_mean": 0.381680621658347,
+   "dense_sd": 5.551115123125783e-17,
+   "sparse_mean": 0.4045093281317585,
+   "sparse_sd": 0.032284666306133185,
+   "long_dense": null,
+   "long_sparse": null
+  }
+ ]
+}
