@@ -5,3 +5,4 @@ __pycache__/
 .planning/
 .claude/
 runs/
+.agents/
