@@ -84,7 +84,7 @@ main 3-seed numbers above. Data: [results/long_eval.csv](results/long_eval.csv) 
 
 - With more training the policies do move away from uniform (entropy falls to about 1.8–2.2 nats, against about 3.18 after
   320 episodes), so the main runs were indeed under-trained.
-- **The extra training does not change the conclusion.** The agent still beats `-O2`/`-O3` on 7 of 8 held-out programs and
+- **The extra training does not change the conclusion.** The agent still beats `-O3` on 7 of 8 held-out programs and `-O2` on 6 to 7 of 8, and
   still loses to `-Oz` and to the best fixed sequence on all 8.
 - The dense policy now outputs some `-sroa` repeats followed by `-instcombine` repeats, with the number of `-sroa` repeats
   depending on the program. That gives 7 distinct strings, but in effect it is the same two-pass sequence
@@ -101,7 +101,8 @@ main 3-seed numbers above. Data: [results/long_eval.csv](results/long_eval.csv) 
   (on qsort, `-O2` gives 2323 instructions against 638 at `-O0`), so beating them on size is a low bar. `-Oz` is the honest
   reference, and the agent does not reach it.
 - **The policy is not program-specific.** 5 of the 6 trained policies output the same greedy sequence for every program:
-  `-sroa` repeated 15 times, where only the first application changes anything. The sixth (sparse, seed 0) outputs
+  `-sroa` repeated 15 times. On 17 of the 20 programs only the first application changes anything; on the other 3 a
+  few later ones still remove instructions. The sixth (sparse, seed 0) outputs
   `-sroa` followed by `-gvn`. That is why the dense runs have zero spread: different weights, identical greedy output.
 - **Why: the policies are barely trained.** Policy entropy moved only from 3.22 to about 3.18 nats (the maximum for 25
   actions is 3.22), so after 320 episodes the policy is still close to uniform. Greedy (argmax) evaluation turns its small

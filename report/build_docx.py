@@ -399,7 +399,8 @@ figure("../results/heldout_per_program.png",
        "Figure 5 - Held-out programs: size relative to -O0 for -O3, -Oz, the best fixed sequence and the agent "
        "(median over seeds).")
 para("How to read it:", bold=True, space_after=2)
-bullet("The agent beats -O2 and -O3 on 7 of the 8 held-out programs, for both reward types.")
+bullet("The agent beats -O3 on 7 of the 8 held-out programs in every run, and -O2 on 6 of 8 (one tie, one loss) in "
+       "five runs and 7 of 8 in the sixth (sparse, seed 0).")
 bullet("It loses to -Oz on every held-out program (one exception: sparse seed 0 on bzip2), and to the best fixed "
        "sequence on all 8. The best fixed sequence is a single random sequence picked on the training programs only.")
 bullet("Every one of the 120 evaluated sequences replays to exactly the same count from a fresh start, with no crashes, "
@@ -416,8 +417,9 @@ bullet("The training curves are flat: 320 episodes (20 policy updates) is not en
 para("6.5  What did the agent learn?", bold=True)
 figure("../results/action_histogram.png", "Figure 8 - Passes chosen by the trained policies (all programs, all seeds).", width=14)
 figure("../results/entropy_noop.png", "Figure 9 - Policy entropy and NOOP use during training.", width=14)
-bullet("5 of the 6 trained policies output the same sequence for every program: -sroa repeated 15 times. Only the first "
-       "-sroa changes anything. The sixth (sparse, seed 0) outputs -sroa followed by -gvn.")
+bullet("5 of the 6 trained policies output the same sequence for every program: -sroa repeated 15 times. On 17 of "
+       "the 20 programs only the first -sroa changes anything; on the other 3 a few later ones still remove "
+       "instructions. The sixth policy (sparse, seed 0) outputs -sroa followed by -gvn.")
 bullet("The reason is under-training. Policy entropy only fell from 3.22 to about 3.18 nats (3.22 is completely random "
        "over 25 actions). Taking the most likely action turns a tiny preference for -sroa into a one-pass sequence.")
 bullet("That single pass already removes about 38% of the instructions, which is enough to beat -O2/-O3 on size here, "
@@ -447,7 +449,7 @@ table([[r.reward, r.episodes, pct(r["test reduction"]), r["vs -O2"], r["vs -O3"]
       widths=[1.7, 1.7, 2.3, 1.7, 1.7, 1.7, 2.3, 3.0])
 bullet("With more training the policies do become less random (entropy about 1.8-2.2), and the best run reaches 41.4% "
        "on the held-out programs (dense: -sroa then -instcombine).")
-bullet("The conclusion does not change: still better than -O2/-O3 on 7 of 8, still worse than -Oz and the best fixed "
+bullet("The conclusion does not change: still better than -O3 on 7 of 8 and -O2 on 6 to 7 of 8, still worse than -Oz and the best fixed "
        "sequence on all 8.")
 
 # ---------------- conclusions ----------------
