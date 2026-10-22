@@ -30,6 +30,45 @@ On our laptop the WSL VM kept crashing under long runs, so `drive.sh` (run from 
 steps in short chunks and resumes after a crash. `drive.sh` trains seed 0 of each reward mode; `drive_seeds.sh`, started
 after it, adds seeds 1 and 2, runs the reward-sum, leakage and overfit checks, and re-evaluates and analyses all six runs.
 
+## Frontend
+
+A static results explorer in `web/` lets you inspect all benchmark comparisons, per-program sequences, training curves, and sanity checks with no WSL and no network connection. An optional Live tab runs a trained policy through a small server in WSL to stream step-by-step CompilerGym optimisations.
+
+To open the explorer locally, double-click `web/index.html` or start a local static file server:
+
+```bash
+python -m http.server -d web 8000
+```
+
+and open `http://127.0.0.1:8000/`. It is also available on GitHub Pages after the repository owner enables Pages with source "GitHub Actions" in repository settings and runs the "Deploy web explorer" workflow by hand.
+
+To regenerate its data:
+
+```bash
+# Inside WSL with the venv active (replays stored sequences into web/traces.json):
+python scripts/export_traces.py
+
+# From the repository root (builds web/data.json and web/data.js from results/, splits/, and local runs/):
+python scripts/export_web.py
+
+# Verify data equality and vendored asset hashes:
+python scripts/check_web.py --require-traces
+python scripts/check_vendor.py
+
+# Run the design gate across all routes:
+bash scripts/web_gate.sh
+```
+
+To run the live server in WSL from the repository root with the venv active:
+
+```bash
+python web/server.py
+```
+
+Then open `http://localhost:8765/`. The server listens on `127.0.0.1` only, runs one policy at a time and refuses a second concurrent run, and the page compares each live result with `results/eval.csv`.
+
+Neither the export scripts nor the server ever write to `results/` or `runs/`.
+
 ## Code
 
 | Path | What it does |
@@ -46,6 +85,11 @@ after it, adds seeds 1 and 2, runs the reward-sum, leakage and overfit checks, a
 | `scripts/overfit_check.py`, `leakage_check.py`, `reward_sum_check.py` | Pre-registered overfit rule, no test program in training or checkpoint choice, dense rewards sum to the sparse reward |
 | `scripts/supplementary.py` | Summary table of the supplementary 2000-episode runs |
 | `report/` | Assessment 10 document (updated with the final results) and its figures |
+| `web/` | Static results explorer (plain HTML/CSS/JS, vendored assets) |
+| `web/server.py` | Local live execution server (WSL, stdlib only, port 8765) |
+| `scripts/export_web.py`, `check_web.py` | Builds `web/data.json` and verifies data equality against `results/` |
+| `scripts/export_traces.py` | Replays stored sequences into `web/traces.json` in WSL |
+| `scripts/web_gate.sh` | Design taste gate and visual measurement suite |
 
 ## Results
 
