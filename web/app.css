@@ -495,6 +495,136 @@ code, pre, .mono { font-family: var(--font-mono); }
 [data-state="error"] p { margin-bottom: 12px; }
 [data-state="error"] code { font-family: var(--font-mono); font-size: var(--fs-small); }
 
+/* ---------- chart legend and swatches (shared) ---------- */
+.chart-legend {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  margin-bottom: 12px; font-size: var(--fs-small); color: var(--text);
+}
+.chart-legend-item {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chart-legend-label {
+  font-size: var(--fs-small); color: var(--text);
+}
+.chart-swatch {
+  display: inline-block; vertical-align: middle; flex-shrink: 0;
+}
+
+/* ---------- sequence strip (shared) ---------- */
+.strip-row {
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 12px; outline: none;
+}
+.strip-row:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 4px;
+}
+.strip-row-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: var(--fs-body); line-height: 20px;
+}
+.strip-row-title {
+  font-size: var(--fs-body); font-weight: 400; color: var(--text);
+}
+.strip-row-meta {
+  display: flex; gap: 12px; align-items: baseline;
+}
+.strip-row-final {
+  font-weight: 500; font-size: var(--fs-body); color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.strip-row-noeff {
+  font-size: var(--fs-small); color: var(--muted);
+}
+.strip-grid {
+  display: grid;
+  grid-template-columns: repeat(15, minmax(40px, 1fr));
+  gap: 4px;
+}
+.strip-cell {
+  height: 44px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 0 2px; box-sizing: border-box;
+  overflow: hidden; user-select: none;
+}
+.strip-cell code {
+  font-family: var(--font-mono); font-size: var(--fs-small);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%; display: block;
+}
+.strip-cell-changed-rl {
+  background-color: var(--hue); color: #ffffff;
+}
+[data-theme="dark"] .strip-cell-changed-rl {
+  background-color: var(--hue); color: #000000;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .strip-cell-changed-rl {
+    background-color: var(--hue); color: #000000;
+  }
+}
+.strip-cell-changed-fixed {
+  background-color: var(--ref-ink); color: #ffffff;
+}
+[data-theme="dark"] .strip-cell-changed-fixed {
+  background-color: var(--ref-ink); color: #000000;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .strip-cell-changed-fixed {
+    background-color: var(--ref-ink); color: #000000;
+  }
+}
+.strip-cell-unchanged {
+  background-color: var(--raised); color: var(--muted);
+}
+.strip-cell-noop {
+  background: transparent; border: 1px dashed var(--control); color: var(--muted);
+}
+.strip-cell-notrace {
+  background: transparent; border: 1px solid var(--control); color: var(--muted);
+}
+.strip-cell-live-empty {
+  background: transparent; border: 1px dashed var(--control);
+}
+.strip-cell-fail {
+  background: var(--pill-negative-bg); border: 1px solid var(--negative); color: var(--negative);
+}
+.strip-no-trace {
+  font-size: var(--fs-small); color: var(--muted); margin-top: 6px;
+}
+.strip-mini {
+  display: flex; flex-direction: column;
+}
+.strip-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 3px;
+  outline: none;
+}
+.strip-mini-grid:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+.strip-mini-cell {
+  height: 24px; border-radius: 3px;
+}
+.strip-caption {
+  font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.4;
+}
+.strip-key {
+  display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+  font-size: var(--fs-small); color: var(--muted);
+}
+.strip-key-item {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.strip-key-swatch {
+  width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; display: inline-block;
+}
+.strip-key-label {
+  font-size: var(--fs-small); color: var(--text);
+}
+.strip-row-muted td { color: var(--muted); }
+.strip-effect-muted { color: var(--muted); }
+
 /* ---------- phone fold at 1100px ---------- */
 @media (max-width: 1100px) {
   .app-shell { grid-template-columns: minmax(0, 1fr); }

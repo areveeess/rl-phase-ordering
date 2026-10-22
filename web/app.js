@@ -297,7 +297,7 @@
         else cardKids.push(opts.body);
       }
 
-      var cls = 'panel card' + (opts.span ? ' span-' + opts.span : '');
+      var cls = 'panel card' + (opts.span ? ' span-' + opts.span : '') + (opts.class ? ' ' + opts.class : '');
       return h('div', { class: cls }, cardKids);
     },
 
@@ -536,12 +536,13 @@
 
     button: function (opts) {
       opts = opts || {};
-      var kind = opts.kind || 'secondary';
+      var kind = opts.kind || opts.variant || 'secondary';
       var cls = 'btn btn-' + kind;
+      var label = opts.label || opts.text || '';
       if (opts.href) {
         var aProps = { class: cls, href: opts.href, role: 'button' };
         if (opts.disabled) aProps['aria-disabled'] = 'true';
-        return h('a', aProps, opts.label);
+        return h('a', aProps, label);
       }
       var btnProps = {
         type: 'button',
@@ -551,7 +552,7 @@
       if (typeof opts.onClick === 'function') {
         btnProps.on = { click: opts.onClick };
       }
-      return h('button', btnProps, opts.label);
+      return h('button', btnProps, label);
     },
 
     emptyBox: function (text) {
