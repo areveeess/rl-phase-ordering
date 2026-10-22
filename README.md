@@ -67,6 +67,32 @@ Wins/ties/losses of each RL run against each reference on the 8 test programs:
 | `-Oz` | 0 / 0 / 8 | 1/0/7, 0/0/8, 0/0/8 |
 | best fixed sequence | 0 / 0 / 8 | 0 / 0 / 8 |
 
+### Supplementary: 2000-episode runs (one seed each, added after the main results)
+
+This experiment was added **after** seeing the main results, to test whether the near-uniform policies are just a
+training-budget problem. It uses the same code, split, reward definitions and validation-based checkpoint selection, but
+2000 training episodes (125 updates) instead of 320, and **only one seed (0) per reward type**. It does not replace the
+main 3-seed numbers above. Data: [results/long_eval.csv](results/long_eval.csv) (driver: `drive_long.sh`).
+
+| run | held-out test reduction | vs `-O2` | vs `-O3` | vs `-Oz` | vs best fixed | distinct greedy sequences (all 20 / test 8) | entropy first → last | checkpoint chosen on val |
+|---|---|---|---|---|---|---|---|---|
+| dense, 2000 ep | 41.4% | 7 / 0 / 1 | 7 / 0 / 1 | 0 / 0 / 8 | 0 / 0 / 8 | 7 / 3 | 3.22 → 2.19 | update 75 (1200 ep) |
+| sparse, 2000 ep | 38.2% | 6 / 1 / 1 | 7 / 0 / 1 | 0 / 0 / 8 | 0 / 0 / 8 | 1 / 1 | 3.22 → 1.83 | update 25 (400 ep) |
+
+(For reference on the same test programs: `-O2` 30.6%, `-O3` 27.0%, `-Oz` 49.1%, best fixed sequence 47.3%.)
+
+- With more training the policies do move away from uniform (entropy falls to about 1.8–2.2 nats, against about 3.18 after
+  320 episodes), so the main runs were indeed under-trained.
+- **The extra training does not change the conclusion.** The agent still beats `-O2`/`-O3` on 7 of 8 held-out programs and
+  still loses to `-Oz` and to the best fixed sequence on all 8.
+- The dense policy now outputs some `-sroa` repeats followed by `-instcombine` repeats, with the number of `-sroa` repeats
+  depending on the program. That gives 7 distinct strings, but in effect it is the same two-pass sequence
+  (`-sroa -instcombine`) everywhere: 13 of its 15 steps change nothing on most programs. It is the best RL result we have
+  (41.4%, one seed), still 7.7 points short of `-Oz`.
+- The sparse run's validation selection chose its earliest checkpoint (400 episodes), because the later checkpoints were
+  no better on validation. Its greedy sequence is `-sroa` ×15 on every program, the same collapse as the main runs.
+- All 40 evaluations replay to the same count from a fresh reset, with no errors.
+
 **What this means:**
 
 - **The learned policy beats `-O2` and `-O3` on code size on held-out programs, but loses to `-Oz`.** It also loses to a
