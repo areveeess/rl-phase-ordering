@@ -1,0 +1,29 @@
+(rlphase) $ python scripts/analyze.py
+   split  programs       -O2       -O3       -Oz  random seq  best fixed seq  RL dense (mean)  RL dense (sd)  RL sparse (mean)  RL sparse (sd)
+0  train         9  0.218132  0.143988  0.500856    0.210590        0.507361         0.395016   0.000000e+00          0.394568        0.000634
+1    val         3  0.404136  0.320707  0.588681    0.240315        0.559572         0.392717   5.551115e-17          0.421112        0.040156
+2   test         8  0.305979  0.270007  0.491156    0.198601        0.473434         0.381681   5.551115e-17          0.404509        0.032285
+    reward  seed  split vs -O2 vs -O3 vs -Oz vs best fixed  crashes replay ok
+0    dense     0   test  6/1/1  7/0/1  0/0/8         0/0/8        0       8/8
+3    dense     1   test  6/1/1  7/0/1  0/0/8         0/0/8        0       8/8
+6    dense     2   test  6/1/1  7/0/1  0/0/8         0/0/8        0       8/8
+9   sparse     0   test  7/0/1  7/0/1  1/0/7         0/0/8        0       8/8
+12  sparse     1   test  6/1/1  7/0/1  0/0/8         0/0/8        0       8/8
+15  sparse     2   test  6/1/1  7/0/1  0/0/8         0/0/8        0       8/8
+1    dense     0  train  5/0/4  6/0/3  1/0/8         0/0/9        0       9/9
+4    dense     1  train  5/0/4  6/0/3  1/0/8         0/0/9        0       9/9
+7    dense     2  train  5/0/4  6/0/3  1/0/8         0/0/9        0       9/9
+10  sparse     0  train  5/0/4  6/0/3  2/0/7         0/0/9        0       9/9
+13  sparse     1  train  5/0/4  6/0/3  1/0/8         0/0/9        0       9/9
+16  sparse     2  train  5/0/4  6/0/3  1/0/8         0/0/9        0       9/9
+2    dense     0    val  2/0/1  2/0/1  0/0/3         0/0/3        0       3/3
+5    dense     1    val  2/0/1  2/0/1  0/0/3         0/0/3        0       3/3
+8    dense     2    val  2/0/1  2/0/1  0/0/3         0/0/3        0       3/3
+11  sparse     0    val  2/0/1  2/0/1  0/0/3         0/0/3        0       3/3
+14  sparse     1    val  2/0/1  2/0/1  0/0/3         0/0/3        0       3/3
+17  sparse     2    val  2/0/1  2/0/1  0/0/3         0/0/3        0       3/3
+
+(rlphase) $ python scripts/supplementary.py
+           run reward  episodes  test programs  test reduction vs -O2 vs -O3 vs -Oz vs best fixed distinct greedy seqs (all/test)  entropy first  entropy last selected checkpoint replay ok
+ long_dense_s0  dense      2000              8          0.4144  7/0/1  7/0/1  0/0/8         0/0/8                             7/3           3.22          2.19       ckpt_00075.pt     20/20
+long_sparse_s0 sparse      2000              8          0.3817  6/1/1  7/0/1  0/0/8         0/0/8                             1/1           3.22          1.83       ckpt_00025.pt     20/20

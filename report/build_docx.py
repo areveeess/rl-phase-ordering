@@ -71,6 +71,14 @@ def code(path, start, end, caption):
     para(f"{caption}  ({path}, lines {start}-{end})", italic=True, size=9, space_after=10)
 
 
+def lines_of(path, first, last):
+    """1-based line numbers of the first line containing `first` and the next line containing `last`."""
+    lines = open(os.path.join(ROOT, path), encoding="utf-8").read().split("\n")
+    a = next(i for i, l in enumerate(lines) if first in l)
+    b = next(i for i in range(a, len(lines)) if last in lines[i])
+    return a + 1, b + 1
+
+
 def figure(png, caption, width=16.5):
     doc.add_picture(os.path.join(HERE, png), width=Cm(width))
     doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -110,7 +118,7 @@ para("Compiler Design - Assessment 10: Implementation (sample code, output, repo
      align=WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
 para("Aryan V Sangai (24BCI0202)  |  Nikhila Abdul Salam (24BCE2690)  |  Raj Vardhan Singh (24BDS0200)", size=10,
      align=WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
-para("Department of Computer Science and Engineering, VIT  -  21 October 2026", size=10,
+para("Department of Computer Science and Engineering, VIT  -  updated 22 October 2026 with the final results", size=10,
      align=WD_ALIGN_PARAGRAPH.CENTER, space_after=14)
 
 # ---------------- repo ----------------
@@ -121,7 +129,7 @@ r.bold = True
 r.font.color.rgb = RGBColor(0x1C, 0x5C, 0xAB)
 para("The repository contains the full source code, the pinned environment (setup.sh, requirements.lock), the "
      "smoke test, the experiment scripts, the measured results (results/) and the design note (DESIGN.md). "
-     "It is updated as the experiments complete.")
+     "Every number in this document is produced by the scripts in the repository.")
 
 # ---------------- background ----------------
 def topic(title, body, ours=None, example=None):
@@ -239,8 +247,9 @@ topic("2.13 Checking that optimised code is still correct",
       "An optimisation is only valid if the program still does the same thing. We run the original program and the "
       "optimised program on the same input with LLVM's lli (an LLVM IR interpreter) and check that they print exactly "
       "the same output.",
-      ours="this lli check passes on qsort, dijkstra and crc32. CompilerGym's own validate() does not work on our "
-           "machine, so we state clearly that our check is a weaker one (one input, a subset of programs).")
+      ours="in the final evaluation the lli check matched on all 42 learned sequences it could check, with no "
+           "mismatch; the other 78 could not be checked. CompilerGym's own validate() does not work on our machine, so "
+           "we state clearly that our check is a weaker one (one input, a subset of programs).")
 
 # ---------------- overview ----------------
 doc.add_heading("3. What we built", level=1)
@@ -275,14 +284,17 @@ table([
     ["rlpo/agent.py", "Policy/value network, running an episode, REINFORCE update"],
     ["rlpo/lli_check.py", "Checks that the optimised program prints the same output as the original (with lli)"],
     ["scripts/baselines.py", "-O0/-O2/-O3/-Oz instruction counts -> results/baselines.csv"],
+    ["rlpo/embed_worker.py", "Runs IR2Vec in a recycled worker process (stops a memory leak in the library)"],
     ["scripts/train.py, evaluate.py, analyze.py", "Training (resumes after a crash), evaluation with replay check, tables and plots"],
+    ["scripts/*_check.py", "Pre-registered overfit rule, no test program in training, dense rewards sum to the sparse reward"],
+    ["drive.sh, drive_seeds.sh, drive_finish.sh", "Crash-tolerant drivers run from Git Bash; drive_finish.sh verifies every output"],
 ], ["File", "Purpose"], widths=[5.0, 11.5])
 
 # ---------------- code ----------------
 doc.add_page_break()
 doc.add_heading("4. Sample code", level=1)
 para("4.1  One step of the MDP (the transition and the reward).", bold=True)
-code("rlpo/env.py", 113, 134, "Listing 1 - PhaseOrderingEnv.step()")
+code("rlpo/env.py", *lines_of("rlpo/env.py", "def step(self, a)", "return self._state(), r, done"), "Listing 1 - PhaseOrderingEnv.step()")
 para("What this code does:", bold=True, space_after=2)
 steps([
     "Remember the current instruction count (prev), so the change can be measured.",
@@ -294,15 +306,17 @@ steps([
     "since the start. Both are divided by the -O0 count, so big and small programs are on the same scale.",
 ])
 para("4.2  Turning the program into numbers (the state).", bold=True)
-code("rlpo/env.py", 45, 57, "Listing 2 - embed_ir()")
+code("rlpo/env.py", *lines_of("rlpo/env.py", "def embed_ir(", "    return vec"), "Listing 2 - embed_ir()")
 para("What this code does:", bold=True, space_after=2)
 steps([
     "Write the IR text to a temporary file in /dev/shm (memory, so it is fast), because IR2Vec reads from a file.",
-    "Call IR2Vec in flow-aware mode ('fa') at program level ('p') to get one vector for the whole program.",
+    "Ask IR2Vec, in flow-aware mode ('fa') at program level ('p'), for one vector for the whole program. The call runs "
+    "in a separate worker process (rlpo/embed_worker.py) that is replaced every 100 calls, because the IR2Vec library "
+    "leaks a few MB per call; the vectors are bit-identical to calling it directly.",
     "Delete the temporary file, and check that the vector has exactly 300 numbers and that none is NaN or infinite.",
 ])
 para("4.3  Learning from experience (the REINFORCE update).", bold=True)
-code("rlpo/agent.py", 46, 74, "Listing 3 - reinforce_update()")
+code("rlpo/agent.py", *lines_of("rlpo/agent.py", "def reinforce_update(", "return {\"policy_loss\""), "Listing 3 - reinforce_update()")
 para("What this code does:", bold=True, space_after=2)
 steps([
     "For every step of every episode, compute the return: the total reward from that step to the end of the episode.",
@@ -329,9 +343,13 @@ para("5.2  How well do LLVM's fixed pipelines shrink code?", bold=True)
 figure("fig_baselines.png", "Figure 2 - Size after -O2, -O3 and -Oz relative to -O0 (lower is smaller).")
 para("How to read it:", bold=True, space_after=2)
 bullet("Each bar is the program size after optimisation divided by its unoptimised size. 1.0 (dashed line) means no change; 0.5 means half the size.")
-bullet("-Oz (green) is the smallest on every program, which is expected because it is built for size.")
+bullet("-Oz (green) is the smallest on 19 of the 20 programs, which is expected because it is built for size. "
+       "The exception is rijndael, where -O2 is smaller (3297 vs 3554 instructions).")
+bullet("-O2 and -O3 can even make code larger than -O0: on qsort both give 2323 instructions against 638 (the bar is cut "
+       "at 1.2 and labelled 3.64).")
 bullet("-O3 (orange) is often bigger than -O2 (blue), e.g. bzip2 0.77 vs 0.70, because it trades size for speed.")
 bullet("To be useful for code size, the agent has to come close to -Oz while using only 15 passes; -Oz runs about 90 pass invocations.")
+bullet("The table lists all 20 programs used in the experiments (ghostscript, jpeg-c and jpeg-d are excluded; see section 7).")
 df = pd.read_csv(os.path.join(ROOT, "results", "baselines.csv"))
 table([[r.benchmark, r.O0, r.O2, r.O3, r.Oz] for r in df.itertuples()],
       ["Program", "-O0", "-O2", "-O3", "-Oz"], widths=[3.5, 3.0, 3.0, 3.0, 3.0])
@@ -347,21 +365,112 @@ bullet("profile_step.py shows where the time goes: computing IR2Vec takes 28 ms 
 para("Note: 32 episodes is far too few to learn a good policy. This policy repeats one pass (-gvn) 15 times, and 14 "
      "of those repeats change nothing. It shows that the pipeline works; it is not a result.", italic=True, size=10)
 
-# ---------------- status ----------------
-doc.add_heading("6. Status and next steps", level=1)
-bullet("Done: reproducible environment, MDP, REINFORCE agent, baselines, sanity baselines, evaluation with replay "
-       "check, lli validation and analysis scripts, all in the repository.")
-bullet("Engineering issues solved: CompilerGym's bundled LLVM needs libtinfo.so.5 (absent on Ubuntu 24.04+); "
-       "env.validate() failed with error 127 because the bundled clang lost LD_LIBRARY_PATH (fixed via its RUNPATH).")
-bullet("In progress: the full training runs (dense vs sparse reward) and the held-out comparison against -O2/-O3/-Oz. "
-       "On this laptop, the WSL2 VM crashes under sustained load (16 GB host RAM shared with Windows), so training was "
-       "made crash-tolerant: it saves state after every update and resumes automatically. Results will be pushed "
-       "to the repository (results/RESULTS.md) as they complete.")
-bullet("Honesty rule of the project: results are reported whether or not the agent beats -O2/-O3/-Oz. "
-       "ghostscript and jpeg-c/jpeg-d are excluded because measuring them crashed the WSL VM, and this exclusion is stated in the results.")
+# ---------------- results ----------------
+doc.add_heading("6. Results", level=1)
+para("Setup: 9 training, 3 validation and 8 held-out test programs; 3 seeds per reward type; 320 training episodes per "
+     "run; the checkpoint with the best validation score is kept; the trained agent always takes its most likely action. "
+     "'Reduction' is 1 - geometric mean of (final size / -O0 size), so higher is better. All numbers come from "
+     "scripts/analyze.py (results/RESULTS.md).")
+para("6.1  Final run output", bold=True)
+figure("fig_final_results.png", "Figure 4 - Output of the final analysis: summary per split, and wins/ties/losses of every run.")
 
-doc.add_heading("7. How to run", level=1)
-for line in ["bash setup.sh", "source ~/venvs/rlphase/bin/activate", "python smoke_test.py", "bash run_all.sh"]:
+summ = pd.read_csv(os.path.join(ROOT, "results", "summary_reduction.csv"))
+
+
+def pct(v):
+    return f"{100 * v:.1f}%"
+
+
+para("6.2  Size reduction vs -O0, per split", bold=True)
+table([[r["split"], r["programs"], pct(r["-O2"]), pct(r["-O3"]), pct(r["-Oz"]), pct(r["random seq"]),
+        pct(r["best fixed seq"]), f'{pct(r["RL dense (mean)"])} ± {100 * r["RL dense (sd)"]:.1f}',
+        f'{pct(r["RL sparse (mean)"])} ± {100 * r["RL sparse (sd)"]:.1f}'] for _, r in summ.iterrows()],
+      ["Split", "Progs", "-O2", "-O3", "-Oz", "Random", "Best fixed", "RL dense", "RL sparse"],
+      widths=[1.4, 1.2, 1.7, 1.7, 1.7, 1.8, 2.0, 2.5, 2.5])
+para("RL columns: mean ± standard deviation over the 3 seeds (in percentage points).", italic=True, size=9)
+
+wl = pd.read_csv(os.path.join(ROOT, "results", "wins_ties_losses.csv"))
+para("6.3  Held-out test programs: wins / ties / losses per program", bold=True)
+table([[r.reward, r.seed, r["vs -O2"], r["vs -O3"], r["vs -Oz"], r["vs best fixed"], r["replay ok"]]
+       for _, r in wl[wl.split == "test"].iterrows()],
+      ["Reward", "Seed", "vs -O2", "vs -O3", "vs -Oz", "vs best fixed", "Replay ok"],
+      widths=[2.0, 1.4, 2.3, 2.3, 2.3, 3.0, 2.3])
+figure("../results/heldout_per_program.png",
+       "Figure 5 - Held-out programs: size relative to -O0 for -O3, -Oz, the best fixed sequence and the agent "
+       "(median over seeds).")
+para("How to read it:", bold=True, space_after=2)
+bullet("The agent beats -O2 and -O3 on 7 of the 8 held-out programs, for both reward types.")
+bullet("It loses to -Oz on every held-out program (one exception: sparse seed 0 on bzip2), and to the best fixed "
+       "sequence on all 8. The best fixed sequence is a single random sequence picked on the training programs only.")
+bullet("Every one of the 120 evaluated sequences replays to exactly the same count from a fresh start, with no crashes, "
+       "and no program ends larger than -O0.")
+
+para("6.4  Dense vs sparse reward", bold=True)
+figure("../results/val_dense_vs_sparse.png",
+       "Figure 6 - Validation programs: dense vs sparse reward (median over seeds, bars = min-max).", width=13)
+figure("../results/training_curves.png", "Figure 7 - Training curves (batch mean size reduction), one line per seed.", width=13)
+bullet("There is no meaningful difference between the two reward types. Sparse is slightly ahead on average only "
+       "because of one seed (sparse seed 0).")
+bullet("The training curves are flat: 320 episodes (20 policy updates) is not enough for either variant to improve much.")
+
+para("6.5  What did the agent learn?", bold=True)
+figure("../results/action_histogram.png", "Figure 8 - Passes chosen by the trained policies (all programs, all seeds).", width=14)
+figure("../results/entropy_noop.png", "Figure 9 - Policy entropy and NOOP use during training.", width=14)
+bullet("5 of the 6 trained policies output the same sequence for every program: -sroa repeated 15 times. Only the first "
+       "-sroa changes anything. The sixth (sparse, seed 0) outputs -sroa followed by -gvn.")
+bullet("The reason is under-training. Policy entropy only fell from 3.22 to about 3.18 nats (3.22 is completely random "
+       "over 25 actions). Taking the most likely action turns a tiny preference for -sroa into a one-pass sequence.")
+bullet("That single pass already removes about 38% of the instructions, which is enough to beat -O2/-O3 on size here, "
+       "but not -Oz. So the agent has not learned a program-specific order.")
+
+para("6.6  Checks", bold=True)
+ov = pd.read_csv(os.path.join(ROOT, "results", "overfit_check.csv"))
+bullet("Overfit check, pre-registered before the run (at least 80% of the -Oz reduction on crc32, qsort and adpcm): PASS ("
+       + ", ".join(f"{r.benchmark} {r.fraction_of_Oz_reduction:.2f}" for r in ov.itertuples())
+       + "). The overfit policy is also -sroa x15, so the rule turned out to be passable by a single pass; it is "
+       "reported as fixed in advance.")
+bullet("Dense rewards sum exactly to the sparse reward on the same action sequence (results/reward_sum_check.txt).")
+bullet("No held-out program was used for training or for checkpoint selection, in any of the 6 runs "
+       "(results/leakage_check.txt).")
+lli = pd.read_csv(os.path.join(ROOT, "results", "lli_validation.csv")).lli_check.value_counts()
+bullet(f"lli output comparison: {lli.get('match', 0)} sequences matched the original program's output, "
+       f"{lli.get('mismatch', 0)} mismatched, {lli.get('not available', 0)} could not be checked.")
+
+lg = pd.read_csv(os.path.join(ROOT, "results", "long_summary.csv"))
+para("6.7  Supplementary: 2000-episode runs (added after the main results)", bold=True)
+para("To test whether the problem is the training budget, we trained one more seed per reward type with 2000 episodes "
+     "instead of 320, otherwise unchanged. This was decided after seeing the main results, uses one seed only, and does "
+     "not replace the numbers above (scripts/supplementary.py, results/long_summary.csv).", space_after=4)
+table([[r.reward, r.episodes, pct(r["test reduction"]), r["vs -O2"], r["vs -O3"], r["vs -Oz"], r["vs best fixed"],
+        f'{r["entropy first"]:.2f} -> {r["entropy last"]:.2f}'] for _, r in lg.iterrows()],
+      ["Reward", "Episodes", "Test reduction", "vs -O2", "vs -O3", "vs -Oz", "vs best fixed", "Entropy"],
+      widths=[1.7, 1.7, 2.3, 1.7, 1.7, 1.7, 2.3, 3.0])
+bullet("With more training the policies do become less random (entropy about 1.8-2.2), and the best run reaches 41.4% "
+       "on the held-out programs (dense: -sroa then -instcombine).")
+bullet("The conclusion does not change: still better than -O2/-O3 on 7 of 8, still worse than -Oz and the best fixed "
+       "sequence on all 8.")
+
+# ---------------- conclusions ----------------
+doc.add_heading("7. Conclusions and limitations", level=1)
+bullet("A learned pass sequence beats LLVM's speed pipelines (-O2, -O3) on code size for held-out programs, but it does "
+       "not beat LLVM's size pipeline -Oz, and it does not beat a good fixed sequence. Following the project's honesty "
+       "rule, this is reported as measured.")
+bullet("With our CPU budget, REINFORCE barely moves away from a random policy, and greedy decoding then collapses to "
+       "one or two passes. Promising next steps: skip passes that would have no effect (action masking), a larger "
+       "budget, PPO, and sampling several sequences per program instead of only the most likely one.")
+bullet("Engineering problems solved along the way: CompilerGym's bundled LLVM needs libtinfo.so.5 (absent on Ubuntu "
+       "24.04+); env.validate() failed with error 127 (bundled clang lost LD_LIBRARY_PATH); the IR2Vec library leaked "
+       "memory on every call, which crashed the WSL VM (fixed with a recycled worker process); and the experiment "
+       "drivers were made crash-tolerant (state saved after every update, steps repeated until their outputs exist).")
+bullet("Limitations: small budget (320 episodes per run), one benchmark suite (cBench, 20 of 23 programs; ghostscript, "
+       "jpeg-c and jpeg-d excluded because measuring them crashed the WSL VM), LLVM 10, IR instruction count only, "
+       "greedy evaluation, and a weaker lli correctness check instead of CompilerGym's validate().")
+
+doc.add_heading("8. How to run", level=1)
+for line in ["bash setup.sh", "source ~/venvs/rlphase/bin/activate", "python smoke_test.py",
+             "bash run_all.sh                          # inside WSL: everything in one go",
+             "bash drive.sh && bash drive_finish.sh    # from Git Bash: same steps, crash-tolerant",
+             "python scripts/supplementary.py          # after drive_long.sh: the 2000-episode runs"]:
     p = doc.add_paragraph()
     r = p.add_run(line)
     r.font.name = "Consolas"

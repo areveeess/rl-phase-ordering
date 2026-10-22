@@ -163,6 +163,32 @@ def main():
     fig.savefig(f"{OUT}/heldout_per_program.png", dpi=160)
     plt.close(fig)
 
+    # 3b. dense vs sparse on the validation programs (median over seeds, bars span min-max over seeds)
+    val = per[per.split == "val"]
+    fig, ax = plt.subplots(figsize=(7, 3.6))
+    xv = np.arange(len(val))
+    refs = [("-Oz", val["-Oz"]), ("best fixed seq", val["best fixed"])]
+    for i, (name, vals) in enumerate(refs):
+        ax.bar(xv + (i - 1.5) * 0.2, vals.values / val.O0.values, 0.18, color=COLORS[name], label=name)
+    for i, mode in enumerate(("dense", "sparse")):
+        g = ev[(ev.split == "val") & (ev.reward == mode)].groupby("benchmark").final
+        med = g.median().loc[val.benchmark].values / val.O0.values
+        lo = g.min().loc[val.benchmark].values / val.O0.values
+        hi = g.max().loc[val.benchmark].values / val.O0.values
+        ax.bar(xv + (i + 0.5) * 0.2, med, 0.18, color=COLORS[f"RL {mode}"], label=f"RL {mode}",
+               yerr=[med - lo, hi - med], capsize=3, error_kw={"ecolor": INK, "lw": 1})
+    ax.axhline(1.0, color=MUTED, lw=1, ls="--")
+    ax.set_xticks(xv)
+    ax.set_xticklabels(val.benchmark, fontsize=9)
+    ax.set_ylabel("instructions / -O0 (lower is smaller)", color=MUTED, fontsize=9)
+    ax.set_title("Validation programs: dense vs sparse reward (median over seeds, bars = min-max)",
+                 color=INK, fontsize=10, loc="left")
+    style(ax)
+    ax.legend(frameon=False, fontsize=8, ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.12))
+    fig.tight_layout()
+    fig.savefig(f"{OUT}/val_dense_vs_sparse.png", dpi=160)
+    plt.close(fig)
+
     # 4. action histogram of greedy sequences
     counts = {}
     for mode in ("dense", "sparse"):

@@ -1,0 +1,3 @@
+run,reward,episodes,test programs,test reduction,vs -O2,vs -O3,vs -Oz,vs best fixed,distinct greedy seqs (all/test),entropy first,entropy last,selected checkpoint,replay ok
+long_dense_s0,dense,2000,8,0.4144,7/0/1,7/0/1,0/0/8,0/0/8,7/3,3.22,2.19,ckpt_00075.pt,20/20
+long_sparse_s0,sparse,2000,8,0.3817,6/1/1,7/0/1,0/0/8,0/0/8,1/1,3.22,1.83,ckpt_00025.pt,20/20
