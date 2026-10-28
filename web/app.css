@@ -83,7 +83,7 @@
   --fs-heading: 1.25rem; /* 20px */
   --fs-body: 1rem;       /* 16px */
   --fs-table: 0.9375rem; /* 15px */
-  --fs-small: 0.8125rem; /* 13px */
+  --fs-small: 0.875rem;  /* 14px: captions, notes, table heads (projector floor) */
 
   --pad: 48px;
   --gap: 24px;
@@ -346,33 +346,33 @@ table.table, .table-frame table, .card table { width: 100%; border-collapse: col
 .strip-row, .strip-live { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; max-width: 100%; overflow-x: auto; }
 .strip-row:focus-visible, .strip-live:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
 .strip-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.strip-row-title { font-size: var(--fs-table); font-weight: 650; font-stretch: 87%; }
+.strip-row-title { font-size: 1rem; font-weight: 700; font-stretch: 87%; }
 .strip-row-meta { display: flex; gap: 14px; align-items: baseline; }
 .strip-row-final { font-weight: 750; font-stretch: 87%; }
-.strip-row-noeff { font-size: var(--fs-small); color: var(--muted); }
+.strip-row-noeff { font-size: var(--fs-small); color: var(--ink-2); }
 .strip-grid {
-  position: relative; display: grid; grid-template-columns: repeat(15, minmax(44px, 1fr)); gap: 0;
+  position: relative; display: grid; grid-template-columns: repeat(15, minmax(52px, 1fr)); gap: 0;
   padding-top: 4px;
 }
 .strip-grid::before {
-  content: ""; position: absolute; left: 22px; right: 22px; top: 13px; height: 4px; background: var(--route);
+  content: ""; position: absolute; left: 26px; right: 26px; top: 14px; height: 6px; background: var(--route);
 }
 .strip-cell {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding-top: 26px; min-height: 52px; user-select: none; color: var(--ink);
+  padding-top: 34px; min-height: 60px; user-select: none; color: var(--ink);
 }
 .strip-cell::before {
-  content: ""; position: absolute; top: 3px; left: 50%; width: 18px; height: 18px; margin-left: -9px;
-  border-radius: 50%; background: var(--paper); border: 4px solid var(--route); box-sizing: border-box; z-index: 1;
+  content: ""; position: absolute; top: 3px; left: 50%; width: 28px; height: 28px; margin-left: -14px;
+  border-radius: 50%; background: var(--paper); border: 6px solid var(--route); box-sizing: border-box; z-index: 1;
 }
-.strip-cell code { font-family: var(--font-frame); font-size: 0.75rem; font-weight: 600; font-stretch: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.strip-cell code { font-family: var(--font-frame); font-size: 0.8125rem; font-weight: 650; font-stretch: 78%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .strip-cell-changed-rl::before { background: var(--route); }
 .strip-cell-changed-fixed::before { background: var(--ink); border-color: var(--ink); }
 .strip-cell-unchanged { color: var(--muted); }
-.strip-cell-unchanged::before { width: 4px; height: 18px; margin-left: -2px; border: 0; border-radius: 0; background: var(--muted); }
+.strip-cell-unchanged::before { width: 5px; height: 28px; margin-left: -2.5px; border: 0; border-radius: 0; background: var(--muted); }
 .strip-cell-unchanged code { text-decoration: line-through; text-decoration-thickness: 1px; }
 .strip-cell-noop { color: var(--muted); }
-.strip-cell-noop::before { width: 18px; height: 8px; margin-left: -9px; top: 8px; border: 0; border-radius: 0; background: var(--paper); }
+.strip-cell-noop::before { width: 28px; height: 10px; margin-left: -14px; top: 12px; border: 0; border-radius: 0; background: var(--paper); }
 .strip-cell-notrace::before { background: var(--paper); border-color: var(--control); }
 .strip-cell-live-empty::before { background: var(--paper); border-color: var(--control); border-style: dashed; }
 .strip-cell-fail { color: var(--signal); }
@@ -438,3 +438,23 @@ table.table, .table-frame table, .card table { width: 100%; border-collapse: col
   font-family: var(--font-read); font-size: 1.0625rem; line-height: 1.55; color: var(--ink-2);
 }
 .table-caption { caption-side: top; text-align: left; padding: 0 0 8px; font-size: var(--fs-small); color: var(--muted); }
+
+/* pinned first column: the row label stays in view when a table scrolls sideways */
+.table-frame th:first-child, .table-frame td:first-child { position: sticky; left: 0; z-index: 1; background: var(--paper); }
+.table-frame tbody tr:nth-child(even) td:first-child { background: var(--paper-2); }
+.table-frame tbody tr[aria-selected="true"] td:first-child { background: var(--route-tint); }
+@media (max-width: 640px) {
+  .table-frame td:first-child, .table-frame th:first-child { box-shadow: 1px 0 0 var(--hair); } /* taste-skill-ignore: edge of a pinned table column */
+}
+
+/* RL columns carry the route colour: "our train" in every timetable */
+.table-frame th.col-rl { color: var(--route); }
+
+/* signature interaction: the active stop and its readout */
+.strip-readout { min-height: 1.5em; font-size: var(--fs-small); line-height: 1.5; color: var(--ink-2); }
+.strip-cell.is-active code { color: var(--ink); text-decoration-color: var(--ink); }
+.strip-cell.is-active::after {
+  content: ""; position: absolute; top: -1px; left: 50%; width: 36px; height: 36px; margin-left: -18px;
+  border-radius: 50%; border: 2px solid var(--ink); box-sizing: border-box; z-index: 2;
+}
+.strip-cell-unchanged.is-active::after { width: 20px; margin-left: -10px; border-radius: 2px; }

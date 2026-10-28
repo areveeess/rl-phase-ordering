@@ -8,8 +8,11 @@
   function getThemeColors() {
     var docTheme = document.documentElement.getAttribute('data-theme');
     var isDark = docTheme === 'dark' || (!docTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    var hue = isDark ? '#5b9bff' : '#1d5fbf';
-    var sparseCol = isDark ? '#3b73cc' : '#5b8fd9';
+    // Dense = route blue, solid; sparse = timetable ink, dashed (applied after drawing):
+    // the two rewards differ by mark as well as hue.
+    var cs = getComputedStyle(document.documentElement);
+    var hue = (cs.getPropertyValue('--route') || '').trim() || (isDark ? '#7fa3ef' : '#1b3e8a');
+    var sparseCol = (cs.getPropertyValue('--ink') || '').trim() || (isDark ? '#eceef1' : '#15171b');
     return { isDark: isDark, hue: hue, sparseCol: sparseCol };
   }
 
@@ -139,9 +142,14 @@
         // Helper to build legend
         function makeLegend() {
           var wrap = App.h('div', { class: 'training-chart-header-extra' });
-          if (window.ChartsExt && typeof window.ChartsExt.legend === 'function') {
-            wrap.appendChild(window.ChartsExt.legend(['dense', 'sparse']));
-          }
+          // line legend: the same stroke and dash the curves use
+          var legend = App.h('div', { class: 'chart-legend' });
+          [['RL dense', colors.dense, null], ['RL sparse', colors.sparse, '6 3']].forEach(function (it) {
+            var sw = App.s('svg', { class: 'chart-swatch', width: '24', height: '10', viewBox: '0 0 24 10', 'aria-hidden': 'true' },
+              App.s('line', { x1: '0', x2: '24', y1: '5', y2: '5', stroke: it[1], 'stroke-width': '2.5', 'stroke-dasharray': it[2] }));
+            legend.appendChild(App.h('span', { class: 'chart-legend-item' }, sw, App.h('span', { class: 'chart-legend-label' }, it[0])));
+          });
+          wrap.appendChild(legend);
           wrap.appendChild(App.h('span', null, numSeedsPerArm + (numSeedsPerArm === 1 ? ' seed each' : ' seeds each')));
           return wrap;
         }

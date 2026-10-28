@@ -315,16 +315,16 @@
         var kids = [];
         if (col.swatch) kids.push(col.swatch);
         kids.push(col.label);
-        var cls = col.numeric ? 'num-col n' : '';
-        return h('th', { scope: 'col', class: cls }, kids);
+        var cls = (col.numeric ? 'num-col n' : '') + (col.cls ? ' ' + col.cls : '');
+        return h('th', { scope: 'col', class: cls.trim() }, kids);
       });
 
       var trs = rows.map(function (row) {
         var isSelected = typeof opts.selected === 'function' ? opts.selected(row) : false;
         var tds = cols.map(function (col) {
           var val = row[col.key];
-          var cls = col.numeric ? 'num-col n' : '';
-          return h('td', { class: cls }, val !== undefined ? val : '-');
+          var cls = (col.numeric ? 'num-col n' : '') + (col.cls ? ' ' + col.cls : '');
+          return h('td', { class: cls.trim() }, val !== undefined ? val : '-');
         });
         var trProps = isSelected ? { 'aria-selected': 'true' } : null;
         return h('tr', trProps, tds);

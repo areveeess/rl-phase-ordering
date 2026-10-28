@@ -155,16 +155,22 @@
         var medFinal = function (prog, reward) {
           return median(App.q.evalRows({ group: 'main', reward: reward, benchmark: prog }).map(function (e) { return e.final; }));
         };
-        var cols = [
-          { key: 'name', label: 'Program' },
-          { key: 'O0', label: '-O0', numeric: true },
-          { key: 'O2', label: '-O2', numeric: true },
-          { key: 'O3', label: '-O3', numeric: true },
-          { key: 'Oz', label: '-Oz', numeric: true },
-          { key: 'best_fixed', label: 'Best fixed', numeric: true },
-          { key: 'dense', label: 'RL dense', numeric: true },
-          { key: 'sparse', label: 'RL sparse', numeric: true }
-        ];
+        var C = {
+          name: { key: 'name', label: 'Program' },
+          O0: { key: 'O0', label: '-O0', numeric: true },
+          O2: { key: 'O2', label: '-O2', numeric: true },
+          O3: { key: 'O3', label: '-O3', numeric: true },
+          Oz: { key: 'Oz', label: '-Oz', numeric: true },
+          best_fixed: { key: 'best_fixed', label: 'Best fixed', numeric: true },
+          dense: { key: 'dense', label: 'RL dense', numeric: true, cls: 'col-rl' },
+          sparse: { key: 'sparse', label: 'RL sparse', numeric: true, cls: 'col-rl' }
+        };
+        // On a phone the comparison that matters (RL against -Oz and the best fixed sequence)
+        // comes first, so the losses show without scrolling sideways.
+        var order = App.isPhone()
+          ? ['name', 'dense', 'sparse', 'Oz', 'best_fixed', 'O2', 'O3', 'O0']
+          : ['name', 'O0', 'O2', 'O3', 'Oz', 'best_fixed', 'dense', 'sparse'];
+        var cols = order.map(function (k) { return C[k]; });
         var rows = programs.map(function (p) {
           var vals = { O2: p.O2, O3: p.O3, Oz: p.Oz, best_fixed: p.best_fixed, dense: medFinal(p.name, 'dense'), sparse: medFinal(p.name, 'sparse') };
           var best = Math.min(vals.O2, vals.O3, vals.Oz, vals.best_fixed, vals.dense, vals.sparse);
@@ -256,11 +262,12 @@
         (data.wtl || []).forEach(function (w) { if (w.split === activeSplit) wtlMap[w.run] = w; });
         var runsAll = data.runs || [];
         var wtlCols = [{ key: 'run', label: 'Run' }].concat(REF_ROWS.map(function (ref) {
-          return { key: ref.key, label: 'vs ' + ref.label, numeric: true };
+          return { key: ref.key, label: 'vs ' + (ref.key === 'vs_best_fixed' ? 'best fixed' : ref.label), numeric: true };
         }));
         var wtlRows = runsAll.map(function (r) {
           var w = wtlMap[r.id];
-          var o = { run: App.q.runLabel(r) + (r.group === 'long' ? ' *' : '') };
+          var short = (r.reward === 'dense' ? 'Dense' : 'Sparse') + (r.group === 'long' ? ' 2000*' : ' s' + r.seed);
+          var o = { run: App.isPhone() ? short : App.q.runLabel(r) + (r.group === 'long' ? ' *' : '') };
           REF_ROWS.forEach(function (ref) {
             var t = w ? w[ref.key] : null;
             o[ref.key] = t ? App.fmt.wtl(t) : '-';
@@ -308,6 +315,10 @@
         var ov = ck.overfit || {};
         var longRuns = App.q.runs('long');
         var foot = h('footer', { class: 'results-foot' },
+          h('p', null, h('strong', null, 'Reduction vs -O0, ' + SPLIT_TITLE[activeSplit].toLowerCase() + ' (geomean). '),
+            '-Oz ' + App.fmt.pct(summary.Oz) + ' · best fixed ' + App.fmt.pct(summary.best_fixed) + ' · RL sparse ' +
+            App.fmt.pct(summary.sparse_mean) + ' · RL dense ' + App.fmt.pct(summary.dense_mean) + ' · -O2 ' + App.fmt.pct(summary.O2) +
+            ' · -O3 ' + App.fmt.pct(summary.O3) + ' · random ' + App.fmt.pct(summary.random) + '.'),
           h('p', null, h('strong', null, 'Budget. '), kMain + ' main runs (' + (kMain / 2) + ' seeds per reward), ' +
             App.fmt.int(mainRuns[0] ? mainRuns[0].episodes : 0) + ' episodes each; ' + longRuns.length + ' supplementary runs of ' +
             App.fmt.int(longRuns[0] ? longRuns[0].episodes : 0) + ' episodes, one seed, added after the main results.'),

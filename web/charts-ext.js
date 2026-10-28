@@ -372,7 +372,7 @@
         x: tx.toFixed(1),
         y: String(axisY + 16),
         'text-anchor': 'middle',
-        'font-size': '12',
+        'font-size': '13',
         fill: tokens.muted
       }, svgEl);
       tickTxt.textContent = mode === 'pct' ? Math.round(tVal * 100) + '%' : formatVal(tVal);
@@ -395,7 +395,7 @@
           x: rx.toFixed(1),
           y: String(padT - 6),
           'text-anchor': 'middle',
-          'font-size': '11',
+          'font-size': '12',
           fill: tokens.muted
         }, svgEl);
         refTxt.textContent = opts.reference.label;
@@ -408,7 +408,7 @@
         var subTxt = s('text', {
           x: '0',
           y: String(curY + 18),
-          'font-size': '12',
+          'font-size': '13',
           fill: tokens.muted
         }, svgEl);
         subTxt.textContent = opts.subheader.text;
@@ -485,7 +485,7 @@
         var valEl = s('text', {
           x: (textEnd + 8).toFixed(1),
           y: String(cy + 4),
-          'font-size': '12',
+          'font-size': '13',
           'font-weight': '500',
           fill: tokens.text
         }, grp);
@@ -494,7 +494,7 @@
         var dashEl = s('text', {
           x: (barX0 + 8).toFixed(1),
           y: String(cy + 4),
-          'font-size': '12',
+          'font-size': '13',
           'font-weight': '400',
           fill: tokens.muted
         }, grp);
@@ -506,7 +506,7 @@
           x: String(w),
           y: String(cy + 4),
           'text-anchor': 'end',
-          'font-size': '12',
+          'font-size': '13',
           fill: r.negativeNote ? tokens.negative : tokens.muted
         }, grp);
         noteEl.textContent = r.note;

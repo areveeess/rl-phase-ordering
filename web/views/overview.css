@@ -59,7 +59,7 @@
 .results-foot {
   margin: 72px calc(-1 * var(--pad)) -96px; padding: 28px var(--pad) 40px;
   background: var(--foot); color: var(--foot-ink);
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px;
   font-size: var(--fs-small); line-height: 1.55; font-stretch: 92%;
 }
 .results-foot strong { font-weight: 750; }

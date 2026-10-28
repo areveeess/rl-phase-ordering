@@ -51,6 +51,53 @@
       noEffectCount + ' had no effect, ends at ' + finalStr + ' instructions';
   }
 
+  /* Signature interaction: hover a stop, or focus the route and use the arrow keys, and the
+     readout under the line names the step, the pass and what it did to the instruction count. */
+  function stopReadout(i, pass, step, before) {
+    var head = 'Stop ' + (i + 1) + ': ' + (pass || 'unknown pass');
+    if (!step) return head + '. Step effects were not recorded.';
+    if (pass === 'NOOP') return head + '. Does nothing (NOOP).';
+    if (!step.changed) return head + '. Ran through: no effect, ' + fmtInt(step.after) + ' instructions.';
+    if (before === undefined || before === null) return head + '. Changed the program: ' + fmtInt(step.after) + ' instructions.';
+    var d = step.after - before;
+    return head + '. Changed the program: ' + fmtInt(before) + ' → ' + fmtInt(step.after) + ' instructions (' +
+      (d > 0 ? '+' : d < 0 ? '−' : '') + fmtInt(Math.abs(d)) + ').';
+  }
+
+  function attachReadout(container, grid) {
+    var cells = Array.prototype.slice.call(grid.querySelectorAll('.strip-cell'));
+    if (!cells.length) return;
+    var readout = document.createElement('p');
+    readout.className = 'strip-readout';
+    readout.setAttribute('aria-live', 'polite');
+    var idle = 'Point at or tap a stop, or focus this route and use the arrow keys, to read each step.';
+    readout.textContent = idle;
+    container.appendChild(readout);
+    var active = -1;
+    function show(i) {
+      if (active >= 0) cells[active].classList.remove('is-active');
+      active = i;
+      if (i < 0) { readout.textContent = idle; return; }
+      cells[i].classList.add('is-active');
+      readout.textContent = cells[i].getAttribute('data-readout') || '';
+    }
+    cells.forEach(function (c, i) {
+      c.addEventListener('mouseenter', function () { show(i); });
+      c.addEventListener('click', function () { show(i); });
+    });
+    grid.addEventListener('mouseleave', function () { if (document.activeElement !== container) show(-1); });
+    container.addEventListener('keydown', function (e) {
+      var n = cells.length, next = -1;
+      if (e.key === 'ArrowRight') next = active < 0 ? 0 : Math.min(n - 1, active + 1);
+      else if (e.key === 'ArrowLeft') next = active < 0 ? 0 : Math.max(0, active - 1);
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = n - 1;
+      if (next >= 0) { e.preventDefault(); show(next); }
+    });
+    container.addEventListener('focus', function () { if (active < 0) show(0); });
+    container.addEventListener('blur', function () { show(-1); });
+  }
+
   function row(el, opts) {
     opts = opts || {};
     var label = opts.label || '';
@@ -148,9 +195,11 @@
         cell.title = (pass || ('Step ' + (i + 1))) + ' (' + effectText + ')';
       }
 
+      cell.setAttribute('data-readout', stopReadout(i, pass, step, traceValid ? (i === 0 ? o0 : steps[i - 1].after) : undefined));
       grid.appendChild(cell);
     }
     container.appendChild(grid);
+    attachReadout(container, grid);
 
     if (!traceValid && steps !== null) {
       var guardNotice = document.createElement('div');
