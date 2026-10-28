@@ -43,7 +43,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Dense vs Sparse Training** - Both reward variants trained with identical settings and at least 3 seeds each *(Complete on repo evidence - G-21 closed in 96a2b60)*
 - [x] **Phase 6: Evaluation and Failure Analysis** - Honest train and held-out comparison against `-O2/-O3/-Oz`, failure-case analysis, and replay of every stored sequence *(Complete on repo evidence - see Close-out)*
 - [x] **Phase 7: Final Outputs** - Scripted tables and plots, demo screenshots, reproducing README and the one-page design note for 21 Oct *(Complete on repo evidence - G-19, G-22 closed in 96a2b60)*
-- [ ] **Phase 8: Web Frontend** - Static results explorer (GitHub Pages / offline) plus an optional live tab that runs the trained policy through a WSL server
+- [x] **Phase 8: Web Frontend** - Static results explorer (GitHub Pages / offline) plus an optional live tab that runs the trained policy through a WSL server
 
 ## Phase Details
 
