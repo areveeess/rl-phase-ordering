@@ -568,6 +568,11 @@
         }
       });
 
+      if (App.describe) {
+        policySelect = App.describe.attach(policySelect, App.describe.run);
+        progSelect = App.describe.attach(progSelect, App.describe.program);
+      }
+
       controlsBlock = h('div', { class: 'live-controls-row' },
         h('div', { class: 'live-control-group' },
           h('span', { class: 'live-control-label' }, 'Policy'),

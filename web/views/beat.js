@@ -257,6 +257,11 @@
     return (App.passText && App.passText[name]) || '';
   }
 
+  // description line and tooltips for a select (kind: 'program' | 'run'); a no-op if reference.js is missing
+  function describe(selectWrap, kind) {
+    return App.describe ? App.describe.attach(selectWrap, App.describe[kind]) : selectWrap;
+  }
+
   /* hovering or focusing a pass names what it does in the readout under the palette */
   var PASS_IDLE = 'Point at or focus a pass to read what it does. Every description is also on the Passes and programs page.';
 
@@ -318,12 +323,12 @@
     var controls = h('div', { class: 'live-controls-row' },
       h('div', { class: 'live-control-group' },
         h('span', { class: 'live-control-label' }, 'Program'),
-        App.ui.select({ value: beat.program, disabled: running, groups: progGroups,
-          onChange: function (v) { beat.program = v; beat.ran = null; beat.status = 'idle'; redraw(); } })),
+        describe(App.ui.select({ value: beat.program, disabled: running, groups: progGroups,
+          onChange: function (v) { beat.program = v; beat.ran = null; beat.status = 'idle'; redraw(); } }), 'program')),
       h('div', { class: 'live-control-group' },
         h('span', { class: 'live-control-label' }, 'Agent to beat'),
-        App.ui.select({ value: beat.opponent, disabled: running, groups: oppGroups,
-          onChange: function (v) { beat.opponent = v; if (beat.status !== 'running') { beat.ran = null; beat.status = 'idle'; } redraw(); } }))
+        describe(App.ui.select({ value: beat.opponent, disabled: running, groups: oppGroups,
+          onChange: function (v) { beat.opponent = v; if (beat.status !== 'running') { beat.ran = null; beat.status = 'idle'; } redraw(); } }), 'run'))
     );
 
     /* route builder */

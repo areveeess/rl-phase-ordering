@@ -420,12 +420,38 @@
       cells.push(cell);
     }
     container.appendChild(grid);
+
+    // hovering or focusing a finished stop says what that pass does and what it did here
+    var idleText = 'Point at or focus a stop to read what its pass does.';
+    var readout = document.createElement('p');
+    readout.className = 'strip-readout';
+    readout.setAttribute('aria-live', 'polite');
+    readout.textContent = idleText;
+    container.appendChild(readout);
+    var info = [];
+    function describeStop(i) {
+      var st = info[i];
+      if (!st) { readout.textContent = idleText; return; }
+      var desc = window.App && App.describe ? App.describe.pass(st.pass) : '';
+      var what = st.pass === 'NOOP' ? 'Did nothing.'
+        : (st.changed ? 'Changed the program: ' : 'No effect here: ') + fmtInt(st.count || st.after) + ' instructions.';
+      readout.textContent = 'Stop ' + (i + 1) + ': ' + st.pass + '. ' + (desc ? desc + ' ' : '') + what;
+    }
+    cells.forEach(function (cell, i) {
+      cell.addEventListener('mouseenter', function () { describeStop(i); });
+      cell.addEventListener('focus', function () { describeStop(i); });
+      cell.addEventListener('mouseleave', function () { readout.textContent = idleText; });
+      cell.addEventListener('blur', function () { readout.textContent = idleText; });
+    });
+
     if (el) el.appendChild(container);
 
     return {
       push: function (step) {
         if (!step || step.index < 0 || step.index >= cells.length) return;
         var cell = cells[step.index];
+        info[step.index] = step;
+        cell.tabIndex = 0;
         cell.className = 'strip-cell';
 
         var code = cell.querySelector('code');
@@ -450,7 +476,10 @@
         }
       },
       reset: function () {
+        info = [];
+        readout.textContent = idleText;
         cells.forEach(function (c) {
+          c.removeAttribute('tabindex');
           c.className = 'strip-cell strip-cell-live-empty';
           var code = c.querySelector('code');
           if (code) code.textContent = '';

@@ -63,8 +63,83 @@
     'tiffmedian': ['Consumer', 'Reduces a colour TIFF image to a small palette with the median-cut algorithm (libtiff tools).']
   };
 
-  // shared with views/beat.js (the pass readout under the palette)
+  // shared with views/beat.js and views/live.js: one source for every description
   App.passText = PASS_TEXT;
+
+  // "-sroa -sroa -gvn" -> "-sroa ×2, -gvn"
+  function compress(seq) {
+    var out = [];
+    for (var i = 0; i < seq.length; ) {
+      var j = i;
+      while (j < seq.length && seq[j] === seq[i]) j++;
+      out.push(seq[i] + (j - i > 1 ? ' ×' + (j - i) : ''));
+      i = j;
+    }
+    return out.join(', ');
+  }
+
+  function runText(id) {
+    var r = App.q.run(id);
+    if (!r) return '';
+    var reward = r.reward === 'dense'
+      ? 'dense reward (paid after every step: the drop in instruction count)'
+      : 'sparse reward (paid once, at the end: the total drop over the episode)';
+    var parts = ['REINFORCE policy trained for ' + App.fmt.int(r.episodes) + ' episodes with ' + reward + ', seed ' + r.seed + '.'];
+    if (r.group === 'long') parts.push('A supplementary run, added after the main results.');
+    if (r.selected_update) parts.push('Checkpoint chosen on the validation programs: update ' + r.selected_update + '.');
+
+    var rows = App.q.evalRows({ run: id, split: 'test' });
+    var seqs = {};
+    rows.forEach(function (row) { seqs[(row.sequence || []).join(' ')] = row.sequence || []; });
+    var keys = Object.keys(seqs);
+    if (rows.length && keys.length === 1) {
+      var only = seqs[keys[0]];
+      var same = only.every(function (p) { return p === only[0]; });
+      parts.push(same
+        ? 'On every held-out program its greedy route is ' + only[0] + ' repeated ' + only.length + ' times.'
+        : 'On every held-out program it takes the same route: ' + compress(only) + '.');
+    } else if (rows.length) {
+      parts.push('It takes ' + keys.length + ' different routes across the ' + rows.length + ' held-out programs.');
+    }
+    return parts.join(' ');
+  }
+
+  function programText(name) {
+    var meta = PROGRAM_TEXT[name];
+    if (!meta) return '';
+    var p = App.q.program(name);
+    var tail = p ? ' ' + App.fmt.int(p.O0) + ' instructions at -O0; ' + App.q.splitNoun(p.split) + ' program.' : '';
+    return meta[0] + ': ' + meta[1] + tail;
+  }
+
+  /* Give a select made by App.ui.select a line under it describing the chosen value, and a tooltip on
+     the select and on each option. describeFn maps a value to its text. Returns the wrapper. */
+  function attach(selectWrap, describeFn) {
+    var sel = selectWrap.querySelector('select');
+    if (!sel) return selectWrap;
+    var line = h('p', { class: 'describe-line' });
+    Array.prototype.forEach.call(sel.options, function (o) {
+      var t = describeFn(o.value);
+      if (t) o.title = t;
+    });
+    function update() {
+      var t = describeFn(sel.value);
+      line.textContent = t;
+      line.hidden = !t;
+      if (t) sel.title = t; else sel.removeAttribute('title');
+    }
+    sel.addEventListener('change', update);
+    update();
+    var wrap = h('div', { class: 'describe-wrap' }, selectWrap, line);
+    return wrap;
+  }
+
+  App.describe = {
+    pass: function (name) { return PASS_TEXT[name] || ''; },
+    program: programText,
+    run: runText,
+    attach: attach
+  };
 
   function familyOf(name, families) {
     var fams = Object.keys(families || {});
