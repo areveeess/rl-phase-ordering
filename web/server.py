@@ -7,10 +7,12 @@ Endpoints:
   GET  /api/health -> 200 {"ok": true, "service": "phase-ordering-live", "busy": bool, "env": "not started"|"idle"|"running"}
   GET  /api/runs   -> 200 {"runs": [...], "programs": {"test": [...], "val": [...], "train": [...]}, "episode_len": 15}
   POST /api/run    -> 200 NDJSON stream (start, 15 steps, done)
-  OPTIONS /api/run -> 204 CORS preflight for loopback origins
+  POST /api/sequence -> 200 NDJSON stream for a hand-picked pass sequence ("Beat the agent")
+  OPTIONS /api/run, /api/sequence -> 204 CORS preflight for loopback origins
   GET  /*          -> static web/ files (.woff2, .js, .json, .css, .html)
 """
 import argparse
+import ast
 import csv
 import http.server
 import json
@@ -28,6 +30,26 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 
 # Loopback Origin pattern: http://localhost:<port> or http://127.0.0.1:<port>
 LOOPBACK_ORIGIN_RE = re.compile(r"^http://(?:localhost|127\.0\.0\.1)(?::\d+)?$")
+
+
+def load_actions(root):
+    """Read PASSES and NOOP from rlpo/env.py without importing it (no CompilerGym needed)."""
+    env_py = Path(root) / "rlpo" / "env.py"
+    passes, noop = [], None
+    if not env_py.is_file():
+        return passes, noop
+    try:
+        tree = ast.parse(env_py.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError) as e:
+        sys.stderr.write(f"Warning: failed to parse {env_py}: {e}\n")
+        return passes, noop
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            if node.targets[0].id == "PASSES":
+                passes = list(ast.literal_eval(node.value))
+            elif node.targets[0].id == "NOOP":
+                noop = ast.literal_eval(node.value)
+    return passes, noop
 
 
 def load_metadata(root):
@@ -115,7 +137,10 @@ def load_metadata(root):
             })
             allowed_run_ids.add(r_id)
 
+    passes, noop = load_actions(root)
+
     return {
+        "allowed_actions": passes + ([noop] if noop else []),
         "programs_by_split": programs_by_split,
         "all_programs": all_programs,
         "allowed_runs": allowed_runs,
@@ -221,6 +246,69 @@ class RealCompilerGymRunner:
             self.close()
 
 
+    def run_sequence(self, program, passes):
+        """Apply a hand-picked pass sequence in CompilerGym and stream each count.
+
+        Uses the raw llvm-v0 environment, so no IR2Vec embedding is computed:
+        the sequence is fixed, not chosen from the state.
+        """
+        t0 = time.time()
+        current_step = 0
+        try:
+            env = self._ensure_env()
+            from rlpo.env import ACTIONS, NOOP, bench_uri
+
+            gym_env = env.env
+            gym_env.reset(benchmark=bench_uri(program))
+            count = int(gym_env.observation["IrInstructionCount"])
+            yield {
+                "type": "start",
+                "program": program,
+                "o0": count,
+                "passes": list(passes),
+                "episode_len": len(passes)
+            }
+
+            no_effect = 0
+            for index, name in enumerate(passes, start=1):
+                current_step = index
+                changed = False
+                if name != NOOP:
+                    obs, _, done, info = gym_env.step(env.flag_index[ACTIONS.index(name)])
+                    if done:
+                        raise RuntimeError(f"CompilerGym ended the episode early: {info}")
+                    count = int(obs)
+                    changed = not info.get("action_had_no_effect", False)
+                if not changed:
+                    no_effect += 1
+                yield {
+                    "type": "step",
+                    "index": index,
+                    "pass": name,
+                    "count": count,
+                    "no_effect": not changed
+                }
+                time.sleep(0.2)
+
+            yield {
+                "type": "done",
+                "final": count,
+                "no_effect": no_effect,
+                "seconds": round(time.time() - t0, 3)
+            }
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            err_kind = "service" if ("compiler_gym" in type(e).__module__ or "service" in str(e).lower()) else "other"
+            yield {
+                "type": "error",
+                "step": current_step,
+                "message": f"{type(e).__name__}: {str(e)}",
+                "kind": err_kind
+            }
+            self.close()
+
+
 def create_handler_class(root, meta, runner_factory, run_lock):
     web_dir = (Path(root) / "web").resolve()
 
@@ -278,7 +366,7 @@ def create_handler_class(root, meta, runner_factory, run_lock):
                 self._send_json(403, {"error": "forbidden"})
                 return
 
-            if self.path in ("/api/run", "/api/health", "/api/runs"):
+            if self.path in ("/api/run", "/api/sequence", "/api/health", "/api/runs"):
                 self.send_response(204)
                 self._send_cors_headers(origin)
                 self.send_header("Content-Length", "0")
@@ -322,7 +410,8 @@ def create_handler_class(root, meta, runner_factory, run_lock):
                 self._send_json(200, {
                     "runs": clean_runs,
                     "programs": meta["programs_by_split"],
-                    "episode_len": 15
+                    "episode_len": 15,
+                    "actions": meta["allowed_actions"]
                 }, origin=origin)
                 return
 
@@ -393,41 +482,29 @@ def create_handler_class(root, meta, runner_factory, run_lock):
                 return
 
             clean_path = self.path.split("?")[0].split("#")[0]
-            if clean_path != "/api/run":
+            if clean_path not in ("/api/run", "/api/sequence"):
                 self._send_json(404, {"error": "not found"}, origin=origin)
                 return
 
-            # Check Content-Type
-            ctype = self.headers.get("Content-Type", "").split(";")[0].strip()
-            if ctype != "application/json":
-                self._send_json(415, {"error": "unsupported media type"}, origin=origin)
+            req_json = self._read_json_body(origin)
+            if req_json is None:
                 return
 
-            # Check Content-Length (max 1024 bytes)
-            clength = self.headers.get("Content-Length")
-            try:
-                clength_int = int(clength) if clength else 0
-            except ValueError:
-                self._send_json(400, {"error": "bad request", "detail": "invalid Content-Length"}, origin=origin)
-                return
+            program = req_json.get("program")
 
-            if clength_int > 1024:
-                self._send_json(413, {"error": "too large"}, origin=origin)
-                return
-
-            raw_body = self.rfile.read(clength_int)
-            try:
-                req_json = json.loads(raw_body.decode("utf-8"))
-            except Exception:
-                self._send_json(400, {"error": "bad request", "detail": "malformed JSON"}, origin=origin)
-                return
-
-            if not isinstance(req_json, dict):
-                self._send_json(400, {"error": "bad request", "detail": "JSON body must be an object"}, origin=origin)
+            if clean_path == "/api/sequence":
+                passes = req_json.get("passes")
+                if (not isinstance(program, str) or not program or not isinstance(passes, list)
+                        or not 1 <= len(passes) <= 15 or not all(isinstance(p, str) for p in passes)):
+                    self._send_json(400, {"error": "bad request", "detail": "program must be a non-empty string and passes a list of 1 to 15 pass names"}, origin=origin)
+                    return
+                if program not in meta["all_programs"] or any(p not in meta["allowed_actions"] for p in passes):
+                    self._send_json(404, {"error": "unknown program or pass"}, origin=origin)
+                    return
+                self._stream(origin, lambda runner: runner.run_sequence(program, passes))
                 return
 
             run_id = req_json.get("run")
-            program = req_json.get("program")
 
             if not isinstance(run_id, str) or not isinstance(program, str) or not run_id or not program:
                 self._send_json(400, {"error": "bad request", "detail": "run and program must be non-empty strings"}, origin=origin)
@@ -440,8 +517,41 @@ def create_handler_class(root, meta, runner_factory, run_lock):
             # Find matching run metadata
             matching_run = next(r for r in meta["allowed_runs"] if r["id"] == run_id)
             stored_final = meta["stored_finals"].get((run_id, program))
+            self._stream(origin, lambda runner: runner.run(matching_run, program, stored_final))
 
-            # Acquire non-blocking lock
+        def _read_json_body(self, origin):
+            """Check Content-Type and size and parse the body; on failure send the error and return None."""
+            ctype = self.headers.get("Content-Type", "").split(";")[0].strip()
+            if ctype != "application/json":
+                self._send_json(415, {"error": "unsupported media type"}, origin=origin)
+                return None
+
+            # Check Content-Length (max 1024 bytes)
+            clength = self.headers.get("Content-Length")
+            try:
+                clength_int = int(clength) if clength else 0
+            except ValueError:
+                self._send_json(400, {"error": "bad request", "detail": "invalid Content-Length"}, origin=origin)
+                return None
+
+            if clength_int > 1024:
+                self._send_json(413, {"error": "too large"}, origin=origin)
+                return None
+
+            raw_body = self.rfile.read(clength_int)
+            try:
+                req_json = json.loads(raw_body.decode("utf-8"))
+            except Exception:
+                self._send_json(400, {"error": "bad request", "detail": "malformed JSON"}, origin=origin)
+                return None
+
+            if not isinstance(req_json, dict):
+                self._send_json(400, {"error": "bad request", "detail": "JSON body must be an object"}, origin=origin)
+                return None
+            return req_json
+
+        def _stream(self, origin, start_gen):
+            """Hold the one-run lock (409 when taken) and stream the runner's events as NDJSON."""
             acquired = run_lock.acquire(blocking=False)
             if not acquired:
                 self._send_json(409, {
@@ -457,9 +567,7 @@ def create_handler_class(root, meta, runner_factory, run_lock):
                 self._send_cors_headers(origin)
                 self.end_headers()
 
-                runner = self.server.runner
-                gen = runner.run(matching_run, program, stored_final)
-                for event in gen:
+                for event in start_gen(self.server.runner):
                     line = (json.dumps(event) + "\n").encode("utf-8")
                     self.wfile.write(line)
                     self.wfile.flush()

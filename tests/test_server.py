@@ -84,6 +84,19 @@ class FakeRunner:
             "seconds": 0.05
         }
 
+    def run_sequence(self, program, passes):
+        self.last_sequence = (program, list(passes))
+        yield {"type": "start", "program": program, "o0": 3000, "passes": list(passes), "episode_len": len(passes)}
+        if self.block_event is not None:
+            self.block_event.wait(timeout=10)
+        count = 3000
+        for i, name in enumerate(passes, start=1):
+            changed = name != "NOOP"
+            if changed:
+                count -= 100
+            yield {"type": "step", "index": i, "pass": name, "count": count, "no_effect": not changed}
+        yield {"type": "done", "final": count, "no_effect": passes.count("NOOP"), "seconds": 0.01}
+
 
 class ServerTestCase(unittest.TestCase):
     @classmethod
@@ -118,7 +131,15 @@ class ServerTestCase(unittest.TestCase):
             encoding="utf-8"
         )
 
-        # 4. runs/
+        # 4. rlpo/env.py (the server reads PASSES and NOOP from it without importing it)
+        rlpo = cls.root / "rlpo"
+        rlpo.mkdir()
+        (rlpo / "env.py").write_text(
+            'import compiler_gym\nPASSES = ["-sroa", "-gvn", "-dce"]\nNOOP = "NOOP"\nACTIONS = PASSES + [NOOP]\n',
+            encoding="utf-8"
+        )
+
+        # 5. runs/
         run_dir = cls.root / "runs" / "dense_s0"
         run_dir.mkdir(parents=True)
         (run_dir / "policy.pt").write_bytes(b"FAKE_POLICY_WEIGHTS")
@@ -371,6 +392,71 @@ class ServerTestCase(unittest.TestCase):
         self.assertEqual(status2, 200)
         lines2 = [json.loads(line) for line in data2.decode("utf-8").strip().splitlines() if line]
         self.assertEqual(lines2[-1]["type"], "done")
+
+    def post_sequence(self, body, headers=None):
+        hdrs = {"Content-Type": "application/json"}
+        if headers:
+            hdrs.update(headers)
+        return self.request("POST", "/api/sequence", headers=hdrs, body=json.dumps(body).encode("utf-8"))
+
+    def test_13_runs_lists_actions(self):
+        """GET /api/runs lists the pass names read from rlpo/env.py, NOOP last."""
+        _, _, data = self.request("GET", "/api/runs")
+        d = json.loads(data.decode("utf-8"))
+        self.assertEqual(d.get("actions"), ["-sroa", "-gvn", "-dce", "NOOP"])
+
+    def test_14_post_sequence_success(self):
+        """POST /api/sequence streams start, one step per pass, then done."""
+        passes = ["-sroa", "NOOP", "-gvn"]
+        status, headers, data = self.post_sequence({"program": "crc32", "passes": passes})
+        self.assertEqual(status, 200)
+        self.assertTrue(headers.get("Content-Type", "").startswith("application/x-ndjson"))
+        lines = [json.loads(line) for line in data.decode("utf-8").strip().splitlines() if line]
+        self.assertEqual([ev["type"] for ev in lines], ["start", "step", "step", "step", "done"])
+        self.assertEqual([ev["pass"] for ev in lines if ev["type"] == "step"], passes)
+        self.assertEqual(lines[-1]["final"], 2800)
+        self.assertEqual(self.server.runner.last_sequence, ("crc32", passes))
+
+    def test_15_post_sequence_validation(self):
+        """Bad sequences are refused before the runner starts."""
+        for body in (
+            {"program": "crc32", "passes": []},                  # empty
+            {"program": "crc32", "passes": ["-sroa"] * 16},      # longer than an episode
+            {"program": "crc32", "passes": "-sroa"},             # not a list
+            {"program": "crc32", "passes": ["-sroa", 3]},        # not all strings
+            {"passes": ["-sroa"]},                               # no program
+        ):
+            status, _, _ = self.post_sequence(body)
+            self.assertEqual(status, 400, body)
+
+        for body in (
+            {"program": "crc32", "passes": ["-O3"]},             # not in the action list
+            {"program": "crc32", "passes": ["-sroa; rm -rf /"]},
+            {"program": "unknown_prog", "passes": ["-sroa"]},
+        ):
+            status, _, _ = self.post_sequence(body)
+            self.assertEqual(status, 404, body)
+
+        status, _, _ = self.post_sequence({"program": "crc32", "passes": ["-sroa"]},
+                                          headers={"Origin": "https://example.org"})
+        self.assertEqual(status, 403)
+        self.assertFalse(hasattr(self.server.runner, "last_sequence"))
+
+    def test_16_sequence_shares_the_run_lock(self):
+        """A sequence run holds the same one-at-a-time lock as a policy run."""
+        self.server.runner.block_event = threading.Event()
+        first = []
+        t = threading.Thread(target=lambda: first.append(self.post_sequence({"program": "crc32", "passes": ["-sroa"]})))
+        t.start()
+        time.sleep(0.2)
+        status, _, _ = self.request("POST", "/api/run", headers={"Content-Type": "application/json"},
+                                    body=json.dumps({"run": "dense_s0", "program": "blowfish"}).encode("utf-8"))
+        self.assertEqual(status, 409)
+        status, _, _ = self.post_sequence({"program": "crc32", "passes": ["-gvn"]})
+        self.assertEqual(status, 409)
+        self.server.runner.block_event.set()
+        t.join(timeout=10)
+        self.assertEqual(first[0][0], 200)
 
 
 if __name__ == "__main__":

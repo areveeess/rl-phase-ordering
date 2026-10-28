@@ -9,6 +9,7 @@
 
   // State management
   var liveState = {
+    mode: 'policy',    // 'policy' (#/live) | 'beat' (#/live/beat, drawn by views/beat.js)
     status: 'offline', // 'offline' | 'checking' | 'ready' | 'running' | 'busy' | 'done' | 'error' | 'lost'
     serverBase: '',    // Answering base: '' (same-origin) or window.CONFIG.LIVE_BASE
     lastChecked: null,
@@ -16,6 +17,7 @@
     selectedProgram: '',
     availableRuns: [],
     availablePrograms: {},
+    availableActions: [],
     episodeLen: 15,
     // Current run telemetry
     runStartTime: 0,
@@ -105,6 +107,7 @@
         liveState.lastChecked = new Date();
         liveState.availableRuns = json.runs || [];
         liveState.availablePrograms = json.programs || {};
+        liveState.availableActions = json.actions || [];
         liveState.episodeLen = json.episode_len || 15;
 
         // Default selections
@@ -437,9 +440,33 @@
   }
 
   // --- Render View UI ---
+  function modeSwitch() {
+    return App.ui.segmented({
+      label: 'Mode',
+      value: liveState.mode,
+      options: [
+        { value: 'policy', label: 'Run a trained policy' },
+        { value: 'beat', label: 'Beat the agent' }
+      ],
+      onChange: function (val) {
+        location.hash = val === 'beat' ? '#/live/beat' : '#/live';
+      }
+    });
+  }
+
   function renderView() {
     if (!viewContainer) return;
     while (viewContainer.firstChild) viewContainer.removeChild(viewContainer.firstChild);
+
+    if (liveState.mode === 'beat' && window.Beat) {
+      viewContainer.appendChild(App.ui.titleRow({
+        h1: 'Live run',
+        finding: 'Pick up to 15 passes yourself, run them in CompilerGym, and see where your route finishes against the agent and LLVM.'
+      }));
+      viewContainer.appendChild(h('div', { class: 'live-mode-row' }, modeSwitch()));
+      viewContainer.appendChild(window.Beat.render());
+      return;
+    }
 
     var isReady = liveState.status === 'ready' || liveState.status === 'done' || liveState.status === 'busy';
     var isChecking = liveState.status === 'checking';
@@ -750,6 +777,7 @@
     });
 
     viewContainer.appendChild(title);
+    viewContainer.appendChild(h('div', { class: 'live-mode-row' }, modeSwitch()));
     viewContainer.appendChild(controlsBlock);
     viewContainer.appendChild(App.ui.grid(stepsCard, resultCard));
 
@@ -760,7 +788,8 @@
   }
 
   // View lifecycle
-  function render(main, ctx) {
+  function render(data, arg) {
+    liveState.mode = arg === 'beat' ? 'beat' : 'policy';
     viewContainer = h('div', { class: 'view-live' });
     renderView();
     return viewContainer;
@@ -773,6 +802,13 @@
   function boot() {
     probe();
   }
+
+  // Shared with views/beat.js: one server probe and one status pill for both modes
+  App.liveServer = {
+    state: liveState,
+    probe: function () { probe(); },
+    port: getLivePort
+  };
 
   App.register('live', {
     title: 'Live run',

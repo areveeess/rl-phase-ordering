@@ -71,7 +71,10 @@ To run the live server in WSL from the repository root with the venv active:
 python web/server.py
 ```
 
-Then open `http://localhost:8765/`. The server listens on `127.0.0.1` only, runs one policy at a time and refuses a second concurrent run, and the page compares each live result with `results/eval.csv`.
+Then open `http://localhost:8765/`. The server listens on `127.0.0.1` only, runs one job at a time and refuses a second concurrent one, and the page compares each live result with `results/eval.csv`. The Live tab has two modes:
+
+- **Run a trained policy** (`#/live`) replays a policy greedily on one program and checks the count against `results/eval.csv`.
+- **Beat the agent** (`#/live/beat`) lets you pick up to 15 of the agent's own 25 actions, applies them in CompilerGym (`POST /api/sequence`), and ranks your measured count against the agent's stored result and LLVM's `-O2`, `-O3`, `-Oz` and the best fixed sequence from `web/data.json`. Copying the agent's route or the best fixed sequence reproduces their stored counts, which makes a quick consistency check.
 
 Neither the export scripts nor the server ever write to `results/` or `runs/`.
 
