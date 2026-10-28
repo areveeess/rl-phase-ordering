@@ -417,6 +417,10 @@ table.table, .table-frame table, .card table { width: 100%; border-collapse: col
   .grid > * { grid-column: 1 / -1 !important; }
   .runhead-links { display: none; }
 }
+/* seven section tabs no longer fit one row below about 900px: wrap them rather than hide one off the edge */
+@media (max-width: 900px) {
+  .runhead-nav { flex-wrap: wrap; overflow-x: visible; }
+}
 @media (max-width: 640px) {
   :root { --pad: 16px; --fs-display: 1.75rem; --fs-hero: 2rem; }
   .runhead-scope { display: none; }

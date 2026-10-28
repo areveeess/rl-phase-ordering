@@ -37,7 +37,7 @@ same steps in short chunks and resume after a crash. Run them in this order:
 
 ## Frontend
 
-A static results explorer in `web/` lets you inspect all benchmark comparisons, per-program sequences, training curves, and sanity checks with no WSL and no network connection. An optional Live tab runs a trained policy through a small server in WSL to stream step-by-step CompilerGym optimisations.
+A static results explorer in `web/` lets you inspect all benchmark comparisons, per-program sequences, training curves, and sanity checks with no WSL and no network connection. A **Passes and programs** page (`#/reference`) describes each of the agent's 25 actions and each cBench program, with counts computed from the data. An optional Live tab runs a trained policy through a small server in WSL to stream step-by-step CompilerGym optimisations.
 
 To open the explorer locally, double-click `web/index.html` or start a local static file server:
 

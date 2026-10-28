@@ -1,0 +1,12 @@
+/* Passes and programs (#/reference): two reference timetables. */
+.view-reference { display: flex; flex-direction: column; gap: 48px; }
+.ref-section { display: flex; flex-direction: column; gap: 12px; }
+.ref-heading { font-size: var(--fs-display); line-height: 1.1; font-weight: 800; font-stretch: 72%; border-bottom: 3px solid var(--rule); padding-bottom: 8px; }
+.ref-lede { font-family: var(--font-read); font-size: 1.0625rem; line-height: 1.55; color: var(--ink-2); max-width: var(--measure); }
+.ref-pass { font-family: var(--font-mono); font-size: 0.875rem; white-space: nowrap; color: var(--route); font-weight: 600; }
+.ref-zero { color: var(--muted); }
+.view-reference td { vertical-align: top; }
+.ref-excluded, .ref-excluded-name { color: var(--muted); }
+.ref-why { color: var(--signal); }
+.ref-nowrap { white-space: nowrap; }
+.view-reference td.ref-desc { min-width: 300px; max-width: 60ch; }
