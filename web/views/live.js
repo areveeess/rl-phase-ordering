@@ -744,6 +744,7 @@
 
     var resultCard = App.ui.card({
       title: 'Result',
+      class: 'live-result-card',
       span: 4,
       body: resultBody
     });

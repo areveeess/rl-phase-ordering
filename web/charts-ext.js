@@ -333,7 +333,7 @@
     }
     var tickMax = ticks[ticks.length - 1] || 1;
 
-    var lw = w < 520 ? 130 : 170;
+    var lw = w < 520 ? 156 : 180;  // fits the longest label ("RL sparse, 2000 episodes")
     var hasRightNote = rows.some(function (r) { return !!r.note; });
     var barX0 = lw + 12;
     var barX1 = w - (hasRightNote ? 96 : 88);

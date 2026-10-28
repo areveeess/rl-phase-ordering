@@ -868,10 +868,10 @@
   function initFonts() {
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(function () {
-        document.documentElement.setAttribute('data-fonts', 'Geist, Geist Mono, Geist 400, Geist 500, Geist Mono 400');
+        document.documentElement.setAttribute('data-fonts', 'Archivo, Source Serif 4');
       });
     } else {
-      document.documentElement.setAttribute('data-fonts', 'Geist, Geist Mono');
+      document.documentElement.setAttribute('data-fonts', 'Archivo, Source Serif 4');
     }
   }
 

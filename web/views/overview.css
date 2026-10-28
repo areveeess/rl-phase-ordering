@@ -1,240 +1,73 @@
-/* Overview view layout styles. Loaded dynamically via App.register styles: true */
+/* Results (#/overview): question, numbered steps beside the timetable, then reference tables. */
 
-.overview-view {
-  display: flex;
-  flex-direction: column;
+.results-head { max-width: 980px; padding-bottom: 28px; }
+.results-question {
+  font-size: var(--fs-hero); line-height: 1; font-weight: 820; font-stretch: 68%; letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.results-standfirst {
+  margin-top: 12px; max-width: 72ch;
+  font-family: var(--font-read); font-size: 1.125rem; line-height: 1.55; color: var(--ink-2);
 }
 
-.overview-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
+/* opening: steps (reading column) | timetable */
+.results-opening {
+  display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); gap: 56px; align-items: start;
+  padding-top: 0; margin-bottom: 72px;
 }
 
-.overview-header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 760px;
+/* the three numbered steps: a real ordered list, numbers set like timetable route numbers */
+.story-steps { counter-reset: step; }
+.story-steps > li {
+  counter-increment: step; position: relative;
+  padding: 14px 0 16px 52px; border-top: 3px solid var(--rule);
 }
+.story-steps > li::before {
+  content: counter(step); position: absolute; left: 0; top: 16px;
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--route-fill); color: var(--route-ink);
+  font-weight: 800; font-stretch: 80%; font-size: 1.125rem;
+}
+.story-steps h2 { font-size: var(--fs-heading); font-weight: 780; font-stretch: 80%; line-height: 1.2; }
+.story-steps p { margin-top: 6px; font-family: var(--font-read); font-size: 1.0625rem; line-height: 1.55; }
+.story-steps a { display: inline-block; margin-top: 8px; font-size: var(--fs-small); font-weight: 650; font-stretch: 87%; }
+.story-steps .loss { color: var(--signal); font-weight: 650; }
 
-.overview-h1 {
-  font-size: var(--fs-display);
-  line-height: 28px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  margin: 0;
-}
+/* the timetable */
+.timetable { min-width: 0; }
+.tt-caption { border-bottom: 3px solid var(--rule); padding-bottom: 10px; }
+.tt-caption-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.tt-caption-row .segmented-wrap .segmented-label, .tt-caption-row > .segmented { margin-bottom: 2px; }
+.tt-caption h2 { font-size: 1.375rem; line-height: 1.15; font-weight: 800; font-stretch: 72%; }
+.tt-caption p { margin-top: 4px; font-size: var(--fs-small); color: var(--muted); }
+.timetable table { font-size: 1rem; }
+.timetable th { padding-top: 12px; }
+.timetable td a { font-weight: 650; text-decoration: none; color: var(--ink); }
+.timetable td a:hover { color: var(--route); text-decoration: underline; }
+.tt-best { font-weight: 800; }
+.tt-rl { color: var(--route); font-weight: 650; }
+.tt-rl.tt-loss { color: var(--signal); }
+.tt-rl.tt-best { color: var(--route); }
 
-.overview-finding {
-  font-size: var(--fs-heading);
-  line-height: 24px;
-  font-weight: 400;
-  color: var(--text);
-  margin: 0;
-}
+.tt-route { margin-top: 32px; }
+.tt-route-caption { font-size: var(--fs-small); color: var(--ink-2); margin-bottom: 10px; max-width: var(--measure); }
+.tt-route > a { font-size: var(--fs-small); font-weight: 650; font-stretch: 87%; }
 
-.overview-header-action {
-  flex-shrink: 0;
-}
+.results-chart { min-height: 200px; }
 
-.overview-filters {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
+/* the footnote band: the dense end of the sheet */
+.results-foot {
+  margin: 72px calc(-1 * var(--pad)) -96px; padding: 28px var(--pad) 40px;
+  background: var(--foot); color: var(--foot-ink);
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px;
+  font-size: var(--fs-small); line-height: 1.55; font-stretch: 92%;
 }
-
-.overview-built {
-  font-size: var(--fs-small);
-  line-height: 16px;
-  color: var(--muted);
-}
-
-/* KPI Strip */
-.overview-kpis {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  margin-bottom: 24px;
-}
-
-.overview-kpi-cell {
-  background: var(--surface);
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.overview-kpi-label {
-  font-size: var(--fs-body);
-  line-height: 20px;
-  color: var(--muted);
-}
-
-.overview-kpi-val-row {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 6px;
-}
-
-.overview-kpi-val {
-  font-size: var(--fs-display);
-  font-weight: 500;
-  line-height: 28px;
-  color: var(--text);
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-.overview-kpi-suffix {
-  font-size: var(--fs-body);
-  line-height: 20px;
-  color: var(--muted);
-}
-
-.overview-kpi-sub {
-  font-size: var(--fs-small);
-  line-height: 16px;
-  color: var(--muted);
-}
-
-/* Evidence card */
-.overview-evidence-card {
-  align-self: start;
-}
-
-.evidence-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.evidence-facts {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--text);
-}
-
-.evidence-fact-item {
-  margin: 0;
-}
-
-.evidence-link {
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--text);
-  text-decoration: underline;
-  align-self: flex-start;
-  margin-top: 4px;
-}
-
-.evidence-link:hover {
-  color: var(--hue);
-}
-
-/* Wins, ties and losses table styling */
-.wtl-table-wrap {
-  width: 100%;
-}
-
-.wtl-table thead th {
-  white-space: nowrap;
-}
-
-.wtl-header-pill {
-  font-size: 11px;
-  padding: 2px 8px;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-
-.wtl-phone-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.wtl-phone-select {
-  height: 44px;
-  font-size: var(--fs-body);
-}
-
-/* Summary table */
-.summary-table-wrap {
-  width: 100%;
-}
-
-.summary-table th {
-  white-space: nowrap;
-}
-
-.summary-phone-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1100px) {
-  .table-frame th:first-child,
-  .table-frame td:first-child {
-    position: sticky;
-    left: 0;
-    background: var(--surface);
-    z-index: 1;
-  }
-  .card tbody tr[aria-selected="true"] td:first-child {
-    background: var(--active);
-  }
-}
+.results-foot strong { font-weight: 750; }
 
 @media (max-width: 640px) {
-  .overview-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .overview-header-action .btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .overview-kpis {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .overview-kpi-cell {
-    padding: 12px 14px;
-  }
-
-  .overview-kpi-val {
-    font-size: 20px;
-    line-height: 24px;
-  }
-
-  .overview-filters {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .overview-built {
-    text-align: right;
-  }
+  .tt-caption-row .segmented button { font-size: 0.8125rem; }
+}
+@media (max-width: 1100px) {
+  .results-opening { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .results-foot { grid-template-columns: minmax(0, 1fr); gap: 16px; }
 }

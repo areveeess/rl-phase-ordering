@@ -48,7 +48,7 @@ def main(argv=None):
     ap.add_argument("--width", type=int, default=1440)
     ap.add_argument("--expect", action="append", default=[], metavar="TEXT", help="text the DOM must contain (repeatable)")
     ap.add_argument("--offline", action="store_true", help="map every host to NOTFOUND (no network)")
-    ap.add_argument("--fonts", action="store_true", help="require data-fonts on <html> to list Geist and Geist Mono")
+    ap.add_argument("--fonts", action="store_true", help="require data-fonts on <html> to list Archivo and Source Serif 4")
     ap.add_argument("--allow-error-state", action="store_true", help="do not fail on data-state=\"error\"")
     args = ap.parse_args(argv)
 
@@ -98,7 +98,7 @@ def main(argv=None):
     if args.fonts:
         m = re.search(r"""<html\b[^>]*\bdata-fonts\s*=\s*["']([^"']*)["']""", dom)
         tokens = {t.strip() for t in re.split(r"[,;|]", m.group(1))} if m else set()
-        report({"Geist", "Geist Mono"} <= tokens, f"html data-fonts lists Geist and Geist Mono (got {sorted(tokens)})")
+        report({"Archivo", "Source Serif 4"} <= tokens, f"html data-fonts lists Archivo and Source Serif 4 (got {sorted(tokens)})")
 
     if failed:
         return 1

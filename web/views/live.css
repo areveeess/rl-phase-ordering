@@ -11,10 +11,7 @@
   display: flex;
   gap: 16px;
   align-items: flex-end;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card, 8px);
-  padding: 16px;
+  padding: 0 0 8px;
 }
 
 .live-control-group {
@@ -42,7 +39,7 @@
 }
 
 .live-chart-box {
-  border-top: 1px solid var(--rule);
+  margin-top: 8px;
   padding-top: 16px;
 }
 
@@ -85,8 +82,8 @@
   justify-content: space-between;
   background-color: var(--raised);
   padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  border-radius: 2px;
+  border: 1.5px solid var(--rule);
   margin-bottom: 12px;
   gap: 8px;
 }
@@ -220,4 +217,9 @@
   .live-controls-row select {
     height: 44px;
   }
+}
+
+/* below the fold the result (or the offline message) reads before the empty route */
+@media (max-width: 1100px) {
+  .live-result-card { order: -1; }
 }

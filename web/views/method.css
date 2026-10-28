@@ -18,7 +18,7 @@
   align-items: center;
   height: 32px;
   font-size: 14px;
-  border-bottom: 1px solid var(--rule);
+  padding: 0 8px;
 }
 
 .split-prog-row:last-child {
@@ -84,12 +84,12 @@
   background-color: var(--raised);
   border-radius: 4px;
   color: var(--text);
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono, monospace); /* taste-skill-ignore: pass names are literal code */
 }
 
 .pass-chip-noop {
   font-weight: 600;
-  border: 1px solid var(--control);
+  border: 1.5px dashed var(--control);
 }
 
 /* Where to read more links */
@@ -103,10 +103,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 12px;
-  background-color: var(--raised);
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  padding: 10px 0;
   text-decoration: none;
   color: var(--text);
   transition: border-color 120ms ease;
@@ -146,3 +143,5 @@
     font-size: 13px;
   }
 }
+
+.split-prog-row:nth-child(even) { background: var(--paper-2); }

@@ -7,3 +7,7 @@ __pycache__/
 runs/
 .agents/
 .taste-skill/
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/decision-payload.json
