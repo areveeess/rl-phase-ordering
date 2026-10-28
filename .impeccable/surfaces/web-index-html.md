@@ -16,7 +16,7 @@ Answer "Did the agent beat LLVM's pipelines on code size, and can I trust that?"
 ## Direction contract
 THESIS: The results are a printed railway timetable: each run's 15 passes are a train's stops on a route line, filled where the pass changed the program and struck where it ran through doing nothing. Refuses the analytics dashboard (cards, KPI tiles, sidebar) and its glossy-editorial opposite.
 
-OWN-WORLD: Cool paper ground, black timetable ink, one route blue that owns the frame (running head band, route lines, RL columns), signal red only for losses and struck stops' state. Timetable ruling: heavy rule under captions, hairline row rules, alternate row tint, tabular figures. Archivo (narrow widths) for the frame, tables, headings and numbers; Source Serif 4 for the reading column. No cards, no shadows, no gradients, no pills used as decoration.
+OWN-WORLD: Cool paper ground, black timetable ink, one route blue that owns the frame (running head band, route lines, RL columns), signal red only for losses and struck stops' state. Cited exception: a status green, used only for passed checks on the Checks route (a check result is a state that must read as passed at a glance). Timetable ruling: heavy rule under captions, hairline row rules, alternate row tint, tabular figures. Archivo (narrow widths) for the frame, tables, headings and numbers; Source Serif 4 for the reading column. No cards, no shadows, no gradients, no pills used as decoration.
 
 STORY: The reader learns the answer (beats -O3 and mostly -O2, loses to -Oz and the best fixed sequence), why (policies collapse to one repeated pass), and the evidence (replay, lli, leakage, overfit rule), then opens a program's route to see it pass by pass.
 
