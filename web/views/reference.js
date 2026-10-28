@@ -63,6 +63,9 @@
     'tiffmedian': ['Consumer', 'Reduces a colour TIFF image to a small palette with the median-cut algorithm (libtiff tools).']
   };
 
+  // shared with views/beat.js (the pass readout under the palette)
+  App.passText = PASS_TEXT;
+
   function familyOf(name, families) {
     var fams = Object.keys(families || {});
     for (var i = 0; i < fams.length; i++) {

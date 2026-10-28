@@ -236,7 +236,7 @@
         props.type = 'button';
         props['data-focus'] = 'slot-' + i;
         props['aria-label'] = 'Stop ' + (i + 1) + ': ' + pass + '. Remove it';
-        props.title = 'Remove ' + pass;
+        props.title = 'Remove ' + pass + (passText(pass) ? '. ' + passText(pass) : '');
         props.disabled = running;
         (function (idx) {
           props.on = { click: function () {
@@ -253,19 +253,46 @@
         cells.map(function (c) { c.setAttribute('role', 'listitem'); return c; })));
   }
 
+  function passText(name) {
+    return (App.passText && App.passText[name]) || '';
+  }
+
+  /* hovering or focusing a pass names what it does in the readout under the palette */
+  var PASS_IDLE = 'Point at or focus a pass to read what it does. Every description is also on the Passes and programs page.';
+
   function palette(running) {
     var full = beat.passes.length >= MAX;
+    var readout = h('p', { class: 'beat-pass-readout', id: 'beat-pass-readout', 'aria-live': 'polite' },
+      beat.hover ? [h('code', null, beat.hover), ' ' + passText(beat.hover)] : PASS_IDLE);
+    function show(name) {
+      beat.hover = name;
+      while (readout.firstChild) readout.removeChild(readout.firstChild);
+      if (name) {
+        readout.appendChild(h('code', null, name));
+        readout.appendChild(document.createTextNode(' ' + passText(name)));
+      } else {
+        readout.textContent = PASS_IDLE;
+      }
+    }
     var buttons = actions().map(function (name) {
       return h('button', {
         type: 'button',
         class: 'beat-pass' + (name === 'NOOP' ? ' beat-pass-noop' : ''),
         'data-focus': 'pass-' + name,
         disabled: running || full,
+        title: passText(name),
         'aria-label': 'Add ' + name,
-        on: { click: function () { setPasses(beat.passes.concat([name])); } }
+        'aria-describedby': 'beat-pass-readout',
+        on: {
+          click: function () { setPasses(beat.passes.concat([name])); },
+          mouseenter: function () { show(name); },
+          focus: function () { show(name); },
+          mouseleave: function () { show(null); },
+          blur: function () { show(null); }
+        }
       }, name);
     });
-    return h('div', { class: 'beat-palette', role: 'group', 'aria-label': 'Passes to add' }, buttons);
+    return [h('div', { class: 'beat-palette', role: 'group', 'aria-label': 'Passes to add' }, buttons), readout];
   }
 
   function build() {
@@ -330,11 +357,11 @@
         routeSlots(running),
         h('div', { class: 'beat-run-row' }, runBtn, counter),
         tools,
-        h('h3', { class: 'beat-palette-title' }, 'The agent\'s ' + actions().length + ' actions'),
-        palette(running),
+        h('h3', { class: 'beat-palette-title' }, 'The agent\'s ' + actions().length + ' actions')
+      ].concat(palette(running), [
         h('p', { class: 'beat-note' },
           'These are the same actions the agent chooses from. -Oz is not a single action: it runs LLVM\'s whole size pipeline.')
-      ]
+      ])
     });
 
     /* standings */
