@@ -721,13 +721,22 @@
         main.replaceChildren(node);
       }
 
-      var heading = main.querySelector('h1');
-      if (heading) {
-        heading.setAttribute('tabindex', '-1');
-        heading.focus({ preventScroll: true });
-      }
+      focusHeading(main, token, 0);
       window.scrollTo(0, 0);
     });
+  }
+
+  // Move focus to the view's h1. Some views add their h1 after an async step, so retry for a
+  // short while (about 2 s) as long as this render is still the current one.
+  function focusHeading(main, token, tries) {
+    if (token !== renderToken) return;
+    var heading = main.querySelector('h1');
+    if (heading) {
+      heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+    } else if (tries < 40) {
+      setTimeout(function () { focusHeading(main, token, tries + 1); }, 50);
+    }
   }
 
   /* ---- Public App methods ---- */

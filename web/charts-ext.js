@@ -260,6 +260,21 @@
 
   function methodBars(el, rows, opts) {
     opts = opts || {};
+    // The chart is often drawn into a container that is not in the page yet (clientWidth 0),
+    // which would fix the viewBox at 600 and shrink the labels on a phone. Remember the
+    // arguments and redraw once the container has its real width, and whenever it changes.
+    el._mbArgs = [rows, opts];
+    if (!el._mbObserved && typeof ResizeObserver === 'function') {
+      el._mbObserved = true;
+      el._mbWidth = 0;
+      new ResizeObserver(function () {
+        var cw = el.clientWidth;
+        if (cw > 0 && Math.abs(cw - el._mbWidth) > 1) {
+          methodBars(el, el._mbArgs[0], el._mbArgs[1]);
+        }
+      }).observe(el);
+    }
+    el._mbWidth = el.clientWidth;
     var mode = opts.mode || 'pct';
     rows = rows || [];
 

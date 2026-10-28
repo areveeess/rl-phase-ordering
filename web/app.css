@@ -281,7 +281,8 @@ code, pre, .mono { font-family: var(--font-mono); }
   font-size: var(--fs-display); line-height: 28px; font-weight: 500;
   letter-spacing: -0.01em;
 }
-.title-row h1:focus { outline: none; }
+/* Route headings take focus for screen readers; the visible ring is for controls only. */
+#main h1[tabindex="-1"]:focus { outline: none; }
 .title-finding {
   margin-top: 4px;
   font-size: var(--fs-heading); line-height: 24px; font-weight: 400;

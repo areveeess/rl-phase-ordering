@@ -112,13 +112,20 @@
   .checks-tr td {
     padding: 2px 0;
     border: none;
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    overflow-wrap: anywhere;
   }
 
   .checks-td-name {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: baseline;
+    gap: 4px 8px;
     font-size: 14px;
+    white-space: normal;
   }
 
   .check-name-mobile-source {
@@ -128,6 +135,7 @@
   }
 
   .checks-td-desc {
+    max-width: none;
     font-size: 13px;
     line-height: 18px;
     color: var(--muted);

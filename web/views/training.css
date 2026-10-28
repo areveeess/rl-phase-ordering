@@ -47,3 +47,8 @@
     min-height: 180px;
   }
 }
+
+/* Stack the chart cards below the 1100px fold, the same rule as .grid in app.css. */
+@media (max-width: 1100px) {
+  .training-charts-grid > * { grid-column: 1 / -1 !important; }
+}
