@@ -38,7 +38,7 @@ Everything heavy (venv, datasets, `~/.local/share/compiler_gym`, temp IR files i
 | `'extras_require' must be a dictionary...` installing gym | modern setuptools | pin build tools, `--no-build-isolation` |
 | `ServiceError: ... returncode: 127` on `make("llvm-v0")` | bundled LLVM 10 needs `libtinfo.so.5`, absent on Ubuntu >= 24.04 | private libtinfo5 + `LD_LIBRARY_PATH` |
 | `env.validate()` -> `Gold standard: Runtime error (127)` | validation runs the bundled `clang` with `PATH` only, so `LD_LIBRARY_PATH` is lost | symlink into `llvm-v0/lib` (clang's RUNPATH is `$ORIGIN/../lib`) |
-| WSL "Catastrophic failure" / all jobs killed | processing `ghostscript` (~400k instructions) exhausts the 8 GB WSL VM | ghostscript excluded from the study |
+| WSL "Catastrophic failure" / all jobs killed | processing `ghostscript` (~400k instructions) exhausts the 8 GB WSL VM (the numbers in this repo were produced under that limit) | ghostscript excluded from the study |
 | Long jobs vanish when started with `nohup`/`setsid` | WSL stops the distro when no `wsl.exe` client is attached | keep the launching `wsl.exe` call running |
 
 ## Output validation: disclosure

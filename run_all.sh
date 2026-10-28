@@ -35,12 +35,16 @@ step "overfit check and -O baselines"
   --train-on crc32 qsort adpcm --out runs/overfit > "$L/overfit.log" 2>&1 &
 python scripts/baselines.py > "$L/baselines.log" 2>&1 &
 wait
-step "sanity baselines"; python scripts/sanity_baselines.py > "$L/sanity.log" 2>&1
+step "sanity baselines"; python scripts/sanity_baselines.py --candidates 50 > "$L/sanity.log" 2>&1
 grep -h -E "done:|Traceback|Error" "$L"/*_s*.log "$L/overfit.log" "$L/sanity.log" | head -20
 
 step evaluation
 python scripts/evaluate.py runs/overfit --programs crc32 qsort adpcm --out results/overfit_eval.csv > "$L/overfit_eval.log" 2>&1
 python scripts/evaluate.py runs/dense_s* runs/sparse_s* --out results/eval.csv > "$L/eval.log" 2>&1; tail -n 1 "$L/eval.log"
+step checks
+for c in reward_sum_check leakage_check overfit_check; do   # outputs: results/<name>.txt
+  python scripts/$c.py > "results/$c.txt" 2>&1; tail -n 1 "results/$c.txt"
+done
 step lli validation;      python scripts/lli_validate.py > "$L/lli.log" 2>&1
 step analysis;            python scripts/analyze.py > "$L/analyze.log" 2>&1; cat "$L/analyze.log"
 mkdir -p logs && cp "$L"/*.log logs/

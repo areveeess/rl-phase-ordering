@@ -26,9 +26,14 @@ python smoke_test.py                  # checks CompilerGym, IR2Vec and output va
 bash run_all.sh                       # baselines, training, evaluation, plots -> results/
 ```
 
-On our laptop the WSL VM kept crashing under long runs, so `drive.sh` (run from Git Bash on Windows) does the same
-steps in short chunks and resumes after a crash. `drive.sh` trains seed 0 of each reward mode; `drive_seeds.sh`, started
-after it, adds seeds 1 and 2, runs the reward-sum, leakage and overfit checks, and re-evaluates and analyses all six runs.
+On our laptop the WSL VM kept crashing under long runs, so the `drive*.sh` scripts (run from Git Bash on Windows) do the
+same steps in short chunks and resume after a crash. Run them in this order:
+
+1. `bash drive.sh`: seed 0 of each reward mode, baselines, overfit run, sanity baselines, evaluation, analysis.
+2. `bash drive_seeds.sh`: seeds 1 and 2, then the reward-sum, leakage and overfit checks.
+3. `bash drive_finish.sh`: re-checks that every run and every evaluation row really exists, repeats what is missing, then
+   re-runs the checks, lli validation and analysis on the complete data. This is the stage the final results come from.
+4. `bash drive_long.sh` (optional): the supplementary 2000-episode runs, then `python scripts/supplementary.py`.
 
 ## Frontend
 
@@ -55,7 +60,8 @@ python scripts/export_web.py
 python scripts/check_web.py --require-traces
 python scripts/check_vendor.py
 
-# Run the design gate across all routes:
+# Run the design gate across all routes (needs Node 22, Chrome, and the taste skill, which is not stored in git:
+#   npx skills add Leonxlnx/taste-skill):
 bash scripts/web_gate.sh
 ```
 
@@ -75,6 +81,7 @@ Neither the export scripts nor the server ever write to `results/` or `runs/`.
 |---|---|
 | `rlpo/env.py` | The MDP: pass list, IR2Vec state, dense/sparse reward |
 | `rlpo/agent.py` | Policy/value network and the REINFORCE update |
+| `rlpo/embed_worker.py` | Runs IR2Vec in a worker process replaced every 100 calls (the library leaks memory per call) |
 | `rlpo/lli_check.py` | Checks that an optimised program still prints the same output (using `lli`) |
 | `scripts/make_split.py` | Train / validation / test split, keeping similar programs together |
 | `scripts/baselines.py` | Instruction counts after `-O0`, `-O2`, `-O3`, `-Oz` |
@@ -84,6 +91,8 @@ Neither the export scripts nor the server ever write to `results/` or `runs/`.
 | `scripts/analyze.py` | Tables and plots |
 | `scripts/overfit_check.py`, `leakage_check.py`, `reward_sum_check.py` | Pre-registered overfit rule, no test program in training or checkpoint choice, dense rewards sum to the sparse reward |
 | `scripts/supplementary.py` | Summary table of the supplementary 2000-episode runs |
+| `run_all.sh`, `drive*.sh` | One-shot pipeline, and the crash-tolerant drivers described above |
+| `tests/test_server.py` | Unit tests of the live server (`python -m unittest discover -s tests -p test_server.py`, in WSL) |
 | `report/` | Assessment 10 document (updated with the final results) and its figures |
 | `web/` | Static results explorer (plain HTML/CSS/JS, vendored assets) |
 | `web/server.py` | Local live execution server (WSL, stdlib only, port 8765) |
