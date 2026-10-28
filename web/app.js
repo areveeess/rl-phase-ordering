@@ -721,21 +721,49 @@
         main.replaceChildren(node);
       }
 
-      focusHeading(main, token, 0);
+      focusHeading(main, token);
       window.scrollTo(0, 0);
     });
   }
 
   // Move focus to the view's h1. Some views add their h1 after an async step, so retry for a
   // short while (about 2 s) as long as this render is still the current one.
-  function focusHeading(main, token, tries) {
-    if (token !== renderToken) return;
-    var heading = main.querySelector('h1');
-    if (heading) {
-      heading.setAttribute('tabindex', '-1');
-      heading.focus({ preventScroll: true });
-    } else if (tries < 40) {
-      setTimeout(function () { focusHeading(main, token, tries + 1); }, 50);
+  // Move focus to the view's h1 on every route change. Some views add or rebuild their h1 after
+  // an async step (Live replaces it when its server probe resolves, which can take seconds), so
+  // keep watching the view: whenever it changes and focus has been lost (it sits on body or on
+  // a node that left the page), focus the current h1 again. The watch ends at the next route
+  // change, at the user's first click or key press, or after 10 s, so focus the user moved is
+  // never taken away.
+  var headingWatch = null;
+  function focusHeading(main, token) {
+    if (headingWatch) headingWatch();
+    function focusNow() {
+      if (token !== renderToken) return stop();
+      var heading = main.querySelector('h1');
+      var active = document.activeElement;
+      var lost = !active || active === document.body || active === main || !document.contains(active);
+      if (heading && (lost || active === heading)) {
+        heading.setAttribute('tabindex', '-1');
+        if (active !== heading) heading.focus({ preventScroll: true });
+      }
+    }
+    var observer = typeof MutationObserver === 'function' ? new MutationObserver(focusNow) : null;
+    var timer = setTimeout(stop, 10000);
+    function stop() {
+      if (observer) observer.disconnect();
+      clearTimeout(timer);
+      document.removeEventListener('pointerdown', stop, true);
+      document.removeEventListener('keydown', stop, true);
+      if (headingWatch === stop) headingWatch = null;
+    }
+    headingWatch = stop;
+    if (observer) observer.observe(main, { childList: true, subtree: true });
+    document.addEventListener('pointerdown', stop, true);
+    document.addEventListener('keydown', stop, true);
+    var first = main.querySelector('h1');
+    if (first) {
+      first.setAttribute('tabindex', '-1');
+      first.focus({ preventScroll: true });
     }
   }
 
